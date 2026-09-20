@@ -1,0 +1,34 @@
+{
+  "llm": {
+    "provider": "ollama",
+    "endpoint": "http://127.0.0.1:11434",
+    "defaultModel": "qwen2.5-coder:7b",
+    "models": {
+      "qwen3:8b": {
+        "name": "Qwen3 8B",
+        "precision": "int4",
+        "device": "cpu",
+        "context": 4096,
+        "temperature": 0.2,
+        "maxTokens": 1024
+      },
+      "qwen2.5-coder:7b": {
+        "name": "Qwen2.5 Coder 7B",
+        "precision": "int4",
+        "device": "cpu",
+        "context": 4096,
+        "temperature": 0.15,
+        "maxTokens": 1024
+      }
+    }
+  },
+  "editor": {
+    "suggestions": true,
+    "formatOnSave": true,
+    "lintOnSave": true
+  },
+  "backend": {
+    "healthCheckUrl": "http://127.0.0.1:11434/v1/models",
+    "timeoutSeconds": 10
+  }
+}

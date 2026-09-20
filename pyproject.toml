@@ -1,0 +1,106 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ai-env"
+version = "0.1.0"
+description = "Local AI coding agent (Ollama + Roo Code) with a browser-based web UI and CLI."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+    { name = "AI Code Project" },
+]
+keywords = ["ai", "coding-agent", "ollama", "roo-code", "web-ui", "local-llm"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Web Environment",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development",
+    "Topic :: Software Development :: Code Generators",
+]
+
+# Runtime dependencies are intentionally stdlib-only by default (see
+# requirements.txt). Optional heavy deps for fine-tuning are listed
+# in the `train` extra and pulled in via requirements.txt on demand.
+dependencies = []
+
+[project.optional-dependencies]
+# Aligns with requirements-dev.txt for `pip install -e ".[dev]"`.
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.11.0",
+    "responses>=0.23.0",
+]
+# Aligns with requirements.txt for users who want the full local stack.
+train = [
+    "transformers>=4.40.0",
+    "datasets>=2.14.0",
+    "accelerate>=0.23.0",
+    "torch>=2.0.0",
+    "tqdm>=4.65.0",
+    "sentencepiece",
+    "tiktoken",
+]
+# Everything in one go.
+all = [
+    "transformers>=4.40.0",
+    "datasets>=2.14.0",
+    "accelerate>=0.23.0",
+    "torch>=2.0.0",
+    "tqdm>=4.65.0",
+    "sentencepiece",
+    "tiktoken",
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.11.0",
+    "responses>=0.23.0",
+]
+
+[project.scripts]
+ai-env = "ai_env.cli:main"
+ai-env-web = "ai_env.web:main"
+
+[project.urls]
+Source = "https://github.com/local/ai-env"
+Issues = "https://github.com/local/ai-env/issues"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-dir]
+"" = "src"
+
+[tool.setuptools.package-data]
+"ai_env" = ["web_ui/*.html", "web_ui/*.js", "web_ui/*.css"]
+
+# ---------------------------------------------------------------------------
+# Pytest configuration (also lives in pytest.ini; mirrored here so that
+# `pip install -e ".[dev]"` + `pytest` works without extra config).
+# ---------------------------------------------------------------------------
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = ["-ra", "--strict-markers", "--tb=short", "--showlocals"]
+markers = [
+    "slow: marks tests as slow (deselect with -m 'not slow')",
+    "integration: marks tests that require real services",
+    "network: marks tests that make network calls",
+]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+]

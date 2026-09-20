@@ -1,0 +1,1706 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Step-by-step setup instructions for the local AI coding environment." />
+  <title>Setup Guide — Local AI Coding Agent</title>
+  <style>
+    /* ========== THEME ========== */
+    :root {
+      --bg: #0f1221;
+      --bg-elev: #161a2e;
+      --bg-elev-2: #1d2240;
+      --border: rgba(255, 255, 255, 0.08);
+      --text: #e9ecfc;
+      --text-dim: #b8bfd6;
+      --text-faint: #8b92ad;
+      --accent: #7c3aed;
+      --accent-2: #2563eb;
+      --ok: #22c55e;
+      --warn: #f59e0b;
+      --danger: #ef4444;
+      --code-bg: #0b0e1c;
+      --code-text: #e6e9f5;
+      --radius: 16px;
+      --radius-sm: 10px;
+      --shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+      --transition: 0.2s ease;
+    }
+    html[data-theme="light"] {
+      --bg: #f7f8fc;
+      --bg-elev: #ffffff;
+      --bg-elev-2: #f1f3fa;
+      --border: rgba(15, 18, 33, 0.10);
+      --text: #14172a;
+      --text-dim: #4a5169;
+      --text-faint: #6b7390;
+      --code-bg: #1a1d2e;
+      --code-text: #e6e9f5;
+    }
+
+    /* ========== RESET ========== */
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background:
+        radial-gradient(circle at 80% 0%, rgba(124, 58, 237, 0.18), transparent 35%),
+        radial-gradient(circle at 0% 100%, rgba(37, 99, 235, 0.10), transparent 35%),
+        var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--accent-2); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code, kbd, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace; }
+    kbd {
+      background: var(--bg-elev-2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 2px 6px;
+      font-size: 0.85em;
+    }
+
+    /* ========== LAYOUT ========== */
+    .layout {
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr);
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 32px 24px 80px;
+      gap: 32px;
+    }
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; padding: 16px; }
+      .toc { position: static !important; }
+    }
+
+    /* ========== TOC ========== */
+    .toc {
+      position: sticky;
+      top: 24px;
+      align-self: start;
+      max-height: calc(100vh - 48px);
+      overflow-y: auto;
+      background: var(--bg-elev);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+    .toc h2 { margin: 0 0 12px; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-faint); }
+    .toc ol { list-style: none; padding: 0; margin: 0; counter-reset: step; }
+    .toc li { counter-increment: step; margin: 4px 0; }
+    .toc a {
+      display: block;
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      color: var(--text-dim);
+      font-size: 0.92rem;
+      transition: background var(--transition), color var(--transition);
+    }
+    .toc a::before { content: counter(step) ". "; color: var(--text-faint); }
+    .toc a:hover { background: var(--bg-elev-2); color: var(--text); text-decoration: none; }
+    .toc a.active { background: var(--accent); color: white; }
+    .toc a.active::before { color: white; }
+
+    .toc-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+    .toc-actions button {
+      flex: 1;
+      padding: 8px 10px;
+      background: var(--bg-elev-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: background var(--transition);
+    }
+    .toc-actions button:hover { background: var(--accent); }
+
+    /* ========== MAIN ========== */
+    main { min-width: 0; }
+    .hero {
+      background: linear-gradient(135deg, rgba(124, 58, 237, 0.18), rgba(37, 99, 235, 0.10));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 36px 32px;
+      margin-bottom: 24px;
+    }
+    .hero h1 { margin: 0 0 8px; font-size: 2rem; }
+    .hero p { margin: 0; color: var(--text-dim); font-size: 1.05rem; }
+    .hero .badges { margin-top: 14px; display: flex; gap: 8px; flex-wrap: wrap; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: var(--bg-elev-2);
+      border: 1px solid var(--border);
+      font-size: 0.82rem;
+      color: var(--text-dim);
+    }
+
+    .progress-bar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      height: 4px;
+      background: var(--bg-elev-2);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+    .progress-bar > div {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      transition: width 0.4s ease;
+    }
+
+    .section {
+      background: var(--bg-elev);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      margin-bottom: 20px;
+      scroll-margin-top: 24px;
+    }
+    .section h2 {
+      margin: 0 0 6px;
+      font-size: 1.35rem;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .section h2 .step-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: white;
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+    .section .lede { margin: 0 0 16px; color: var(--text-dim); }
+
+    /* ========== CHECKBOX / STEP ========== */
+    .step-row {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .step-row input[type="checkbox"] {
+      flex-shrink: 0;
+      appearance: none;
+      width: 22px;
+      height: 22px;
+      border: 2px solid var(--border);
+      border-radius: 6px;
+      background: var(--bg-elev-2);
+      cursor: pointer;
+      margin-top: 2px;
+      position: relative;
+      transition: background var(--transition), border-color var(--transition);
+    }
+    .step-row input[type="checkbox"]:checked {
+      background: var(--ok);
+      border-color: var(--ok);
+    }
+    .step-row input[type="checkbox"]:checked::after {
+      content: "✓";
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .step-row input[type="checkbox"]:checked + .step-body :is(h3, p, li) {
+      color: var(--text-faint);
+      text-decoration: line-through;
+      text-decoration-color: var(--text-faint);
+    }
+
+    /* ========== CODE BLOCK ========== */
+    .code-block {
+      position: relative;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      margin: 12px 0;
+      overflow: hidden;
+    }
+    .code-block-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 12px;
+      background: rgba(255, 255, 255, 0.03);
+      border-bottom: 1px solid var(--border);
+      font-size: 0.78rem;
+      color: var(--text-faint);
+    }
+    .code-block pre {
+      margin: 0;
+      padding: 14px 16px;
+      overflow-x: auto;
+      color: var(--code-text);
+      font-size: 0.88rem;
+      line-height: 1.55;
+    }
+    .copy-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      cursor: pointer;
+      transition: background var(--transition), color var(--transition);
+    }
+    .copy-btn:hover { background: var(--accent); color: white; border-color: var(--accent); }
+    .copy-btn.copied { background: var(--ok); color: white; border-color: var(--ok); }
+
+    /* ========== NOTES / CALLOUTS ========== */
+    .callout {
+      display: flex;
+      gap: 12px;
+      padding: 14px 16px;
+      border-radius: var(--radius-sm);
+      margin: 14px 0;
+      border-left: 4px solid;
+    }
+    .callout .icon { font-size: 1.2rem; line-height: 1; }
+    .callout p { margin: 0; color: var(--text-dim); }
+    .callout.info    { background: rgba(37, 99, 235, 0.08); border-color: var(--accent-2); }
+    .callout.tip     { background: rgba(34, 197, 94, 0.08);  border-color: var(--ok); }
+    .callout.warn    { background: rgba(245, 158, 11, 0.08); border-color: var(--warn); }
+    .callout.danger  { background: rgba(239, 68, 68, 0.08);  border-color: var(--danger); }
+
+    /* ========== TWO-COL LISTS ========== */
+    .col-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 700px) { .col-2 { grid-template-columns: 1fr; } }
+
+    .quick-card {
+      background: var(--bg-elev-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+    }
+    .quick-card h4 { margin: 0 0 6px; font-size: 1rem; }
+    .quick-card p  { margin: 0 0 8px; font-size: 0.9rem; color: var(--text-dim); }
+
+    /* ========== FOOTER / THEME TOGGLE ========== */
+    .floating-actions {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      display: flex;
+      gap: 8px;
+      z-index: 50;
+    }
+    .floating-actions button {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--bg-elev);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 1.1rem;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      transition: transform var(--transition);
+    }
+    .floating-actions button:hover { transform: translateY(-2px); }
+
+    footer {
+      text-align: center;
+      color: var(--text-faint);
+      font-size: 0.9rem;
+      margin-top: 40px;
+    }
+
+    /* ========== CONTROL PANEL ========== */
+    .cp-tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 20px;
+      background: var(--bg-elev-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 6px;
+    }
+    .cp-tab {
+      flex: 1;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--text-dim);
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .cp-tab.active {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: white;
+      box-shadow: 0 2px 8px rgba(124, 58, 237, 0.3);
+    }
+    .cp-tab:hover:not(.active) { background: var(--bg-elev); color: var(--text); }
+
+    .cp-panel { display: none; }
+    .cp-panel.active { display: block; }
+
+    /* metric cards */
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .metric-card {
+      background: var(--bg-elev-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .metric-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    }
+    .metric-card .metric-val {
+      font-size: 1.6rem;
+      font-weight: 800;
+      font-family: monospace;
+      color: var(--text);
+      display: block;
+      line-height: 1.2;
+    }
+    .metric-card .metric-label {
+      font-size: 0.75rem;
+      color: var(--text-faint);
+      margin-top: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    /* live log */
+    .live-log {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      height: 180px;
+      overflow-y: auto;
+      padding: 12px 14px;
+      font-family: monospace;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      line-height: 1.55;
+    }
+    .live-log .log-entry { margin: 0; padding: 1px 0; }
+    .live-log .log-ok { color: var(--ok); }
+    .live-log .log-warn { color: var(--warn); }
+    .live-log .log-err { color: var(--danger); }
+    .live-log .log-dim { color: var(--text-faint); }
+
+    /* action buttons in panel */
+    .action-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 16px;
+      align-items: center;
+    }
+    .action-btn {
+      padding: 9px 18px;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      transition: all var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+    .action-btn::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(255,255,255,0);
+      transition: background 0.15s;
+    }
+    .action-btn:hover::after { background: rgba(255,255,255,0.08); }
+    .action-btn:active { transform: scale(0.97); }
+    .btn-start { background: var(--ok); color: white; }
+    .btn-stop  { background: var(--danger); color: white; }
+    .btn-vscode{ background: var(--accent-2); color: white; }
+    .btn-crawl { background: var(--warn); color: white; }
+    .btn-neutral { background: var(--bg-elev-2); color: var(--text); border: 1px solid var(--border); }
+
+    /* status pill */
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 0.8rem;
+    }
+    .status-pill::before {
+      content: '';
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+      animation: blink 2s infinite;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+    .pill-ok     { background: rgba(34, 197, 94, 0.15); color: var(--ok); }
+    .pill-danger { background: rgba(239, 68, 68, 0.15); color: var(--danger); background-color: rgba(239,68,68,0.12); }
+    .pill-ok::before { animation: none; opacity:1; }
+
+    /* progress ring */
+    .ring-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .ring-wrap svg { transform: rotate(-90deg); }
+    .ring-label { font-size: 0.75rem; color: var(--text-faint); margin-top: 4px; text-align: center; }
+
+    /* crawler progress bar */
+    .mini-progress {
+      height: 6px;
+      background: var(--bg-elev-2);
+      border-radius: 999px;
+      overflow: hidden;
+      margin: 8px 0;
+    }
+    .mini-progress-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--warn), #f97316);
+      transition: width 0.5s ease;
+    }
+
+    /* Neural net canvas rows */
+    .model-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .model-net-card {
+      background: var(--bg-elev-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+    }
+    .model-net-card h5 { margin: 0 0 8px; font-size: 0.88rem; color: var(--text-dim); }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <!-- ========== SIDEBAR / TOC ========== -->
+    <nav class="toc" aria-label="Table of contents">
+      <h2>Setup Guide</h2>
+      <ol>
+        <li><a href="#step-1">Open in VS Code</a></li>
+        <li><a href="#step-2">Create virtual env</a></li>
+        <li><a href="#step-3">Install packages</a></li>
+        <li><a href="#step-4">Verify env</a></li>
+        <li><a href="#step-5">Roo Code config</a></li>
+        <li><a href="#step-6">Start services</a></li>
+        <li><a href="#step-7">Pull a model</a></li>
+        <li><a href="#step-8">Health check</a></li>
+        <li><a href="#step-9">VS Code extensions</a></li>
+        <li><a href="#step-10">Use Ollama</a></li>
+        <li><a href="#step-11">Launch Web UI</a></li>
+        <li><a href="#step-12">Prepare training data</a></li>
+        <li><a href="#step-13">Train the model</a></li>
+        <li><a href="#step-14">Resume training</a></li>
+        <li><a href="#control-panel">🎛 Control Panel</a></li>
+        <li><a href="#troubleshoot">Troubleshooting</a></li>
+        <li><a href="#models">Model reference</a></li>
+      </ol>
+      <div class="toc-actions">
+        <button id="reset-checks" type="button">Reset</button>
+        <button id="theme-toggle" type="button">Theme</button>
+      </div>
+    </nav>
+
+    <!-- ========== MAIN ========== -->
+    <main>
+      <header class="hero">
+        <h1>Local AI Coding Agent</h1>
+        <p>Step-by-step setup for a fully local, privacy-first AI coding environment powered by Ollama, Roo Code, and a fine-tuned Qwen2.5-Coder model.</p>
+        <div class="badges">
+          <span class="badge">Python 3.11+</span>
+          <span class="badge">Windows 11 ready</span>
+          <span class="badge">Local LLM</span>
+          <span class="badge">100% offline</span>
+        </div>
+      </header>
+
+      <div class="progress-bar" aria-hidden="true"><div id="progress-fill"></div></div>
+
+      <!-- STEP 1 -->
+      <section class="section" id="step-1">
+        <h2><span class="step-num">1</span> Open this repository in VS Code</h2>
+        <p class="lede">Open the project folder in Visual Studio Code. The workspace already includes recommended settings and extensions.</p>
+        <label class="step-row">
+          <input type="checkbox" data-step />
+          <div class="step-body">
+            <p>In VS Code: <kbd>Ctrl</kbd>+<kbd>K</kbd> <kbd>Ctrl</kbd>+<kbd>O</kbd> &rarr; choose this folder.</p>
+          </div>
+        </label>
+      </section>
+
+      <!-- STEP 2 -->
+      <section class="section" id="step-2">
+        <h2><span class="step-num">2</span> Create and activate a virtual environment</h2>
+        <p class="lede">Isolate Python dependencies from the rest of your system.</p>
+        <label class="step-row">
+          <input type="checkbox" data-step />
+          <div class="step-body">
+            <p><strong>Windows (PowerShell):</strong></p>
+            <div class="code-block" data-lang="powershell">
+              <div class="code-block-header">
+                <span>PowerShell</span>
+                <button class="copy-btn" type="button">Copy</button>
+              </div>
+              <pre>python -m venv .venv
+.\.venv\Scripts\Activate.ps1</pre>
+            </div>
+            <p><strong>Linux / macOS:</strong></p>
+            <div class="code-block" data-lang="bash">
+              <div class="code-block-header">
+                <span>bash</span>
+                <button class="copy-btn" type="button">Copy</button>
+              </div>
+              <pre>python -m venv .venv
+source .venv/bin/activate</pre>
+            </div>
+            <div class="callout info">
+              <span class="icon">ℹ️</span>
+              <p>If PowerShell blocks the activate script, run <code>Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned</code> once.</p>
+            </div>
+          </div>
+        </label>
+      </section>
+
+      <!-- STEP 3 -->
+      <section class="section" id="step-3">
+        <h2><span class="step-num">3</span> Install required packages</h2>
+        <p class="lede">Upgrade pip and install the project's dependencies. The <code>ai_env</code> package itself only needs the standard library; everything else is for fine-tuning.</p>
+        <label class="step-row">
+          <input type="checkbox" data-step />
+          <div class="step-body">
+            <div class="code-block" data-lang="bash">
+              <div class="code-block-header">
+                <span>bash</span>
+                <button class="copy-btn" type="button">Copy</button>
+              </div>
+              <pre>python -m pip install --upgrade pip
+python -m pip install -r requirements.txt</pre>
+            </div>
+          </div>
+        </label>
+      </section>
+
+      <!-- STEP 4 -->
+      <section class="section" id="step-4">
+        <h2><span class="step-num">4</span> Verify the environment</h2>
+        <p class="lede">The <code>ai_env</code> CLI checks Python, ports, and required binaries.</p>
+        <label class="step-row">
+          <input type="checkbox" data-step />
+          <div class="step-body">
+            <div class="code-block" data-lang="bash">
+              <div class="code-block-header">
+                <span>bash</span>
+                <button class="copy-btn" type="button">Copy</button>
+              </div>
+              <pre>python -m ai_env check</pre>
+            </div>
+            <div class="callout tip">
+              <span class="icon">✅</span>
+              <p>All four commands (<code>python</code>, <code>ollama</code>, <code>roocode</code>, <code>code</code>) should be reported as found.</p>
+            </div>
+          </div>
+        </label>
+      </section>
+
+      <!-- STEP 5 -->
+      <section class="section" id="step-5">
+        <h2><span class="step-num">5</span> Generate the Roo Code config</h2>
+        <label class="step-row">
+          <input type="checkbox" data-step />
+          <div class="step-body">
+            <div class="code-block" data-lang="bash">
+              <div class="code-block-header">
+                <span>bash</span>
+                <button class="copy-btn" type="button">Copy</button>
+              </div>
+              <pre>python -m ai_env config</pre>
+            </div>
+            <p>This writes <code>roocode/roocode-ollama-config.json</code> with sensible defaults for Qwen2.5-Coder 7B and Qwen3 8B.</p>
+          </div>
+        </label>
+      </section>
+
+      <!-- STEP 6 -->
+      <section class="section" id="step-6">
+        <h2><span class="step-num">6</span> Start local services</h2>
+        <p class="lede">Starts Ollama and (optionally) Roo Code as background processes.</p>
+        <label class="step-row">
+          <input type="checkbox" data-step />
+          <div class="step-body">
+            <div class="code-block" data-lang="bash">
+              <div class="code-block-header">
+                <span>bash</span>
+                <button class="copy-btn" type="button">Copy</button>
+              </div>
+              <pre>python scripts\start_services.py</pre>
+            </div>
+            <p>To stop them later: <code>python scripts\stop_services.py</code></p>
+          </div>
+        </label>
+      </section>
+
+      <!-- STEP 7 -->
+      <section class="section" id="step-7">
+        <h2><span class="step-num">7</span> Pull a model</h2>
+        <label class="step-row">
+          <input type="checkbox" data-step />
+          <div class="step-body">
+            <div class="code-block" data-lang="bash">
+              <div class="code-block-header">
+                <span>bash</span>
+                <button class="copy-btn" type="button">Copy</button>
+              </div>
+              <pre>python scripts\manage_models.py pull qwen2.5-coder:7b</pre>
+            </div>
+            <p>See <a href="#models">Model reference</a> below for alternatives.</p>
+          </div>
+        </label>
+      </section>
+
+      <!-- STEP 8 -->
+      <section class="section" id="step-8">
+        <h2><span class="step-num">8</span> Run health checks</h2>
+        <label class="step-row">
+          <input type="checkbox" data-step />
+          <div class="step-body">
+            <div class="code-block" data-lang="bash">
+              <div class="code-block-header">
+                <span>bash</span>
+                <button class="copy-btn" type="button">Copy</button>
+              </div>
+              <pre>python scripts\healthcheck.py</pre>
+            </div>
+          </div>
+        </label>
+      </section>
+
+      <!-- STEP 9 -->
+      <section class="section" id="step-9">
+        <h2><span class="step-num">9</span> Install recommended VS Code extensions</h2>
+        <p class="lede">Open the Extensions panel and install everything listed in <code>.vscode/extensions.json</code>. The workspace will offer a one-click install on first open.</p>
+        <label class="step-row">
+          <input type="checkbox" data-step />
+          <div class="step-body">
+            <p>Then open the extension at <code>extension/</code> in a new VS Code window:</p>
+            <div class="code-block" data-lang="bash">
+              <div class="code-block-header">
+                <span>bash</span>
+                <button class="copy-btn" type="button">Copy</button>
+              </div>
+              <pre>cd extension
+npm install
+npm run compile
+# Press F5 in VS Code to launch the extension dev host</pre>
+            </div>
+          </div>
+        </label>
+      </section>
+
+      <!-- STEP 10 -->
+      <section class="section" id="step-10">
+        <h2><span class="step-num">10</span> Use Ollama</h2>
+        <p class="lede">You can talk to Ollama directly, or use it through Roo Code.</p>
+        <label class="step-row">
+          <input type="checkbox" data-step />
+          <div class="step-body">
+            <div class="code-block" data-lang="bash">
+              <div class="code-block-header">
+                <span>bash</span>
+                <button class="copy-btn" type="button">Copy</button>
+              </div>
+              <pre>curl http://127.0.0.1:11434/v1/models
+# or just chat:
+ollama run qwen2.5-coder:7b "Write a Python function to debounce events"</pre>
+            </div>
+          </div>
+        </label>
+      </section>
+
+      <!-- STEP 11 -->
+      <section class="section" id="step-11">
+        <h2><span class="step-num">11</span> Launch the Web UI</h2>
+        <p class="lede">A polished browser-based chat + file editor with markdown rendering, syntax highlighting, and a tabbed file tree.</p>
+        <label class="step-row">
+          <input type="checkbox" data-step />
+          <div class="step-body">
+            <div class="code-block" data-lang="bash">
+              <div class="code-block-header">
+                <span>bash</span>
+                <button class="copy-btn" type="button">Copy</button>
+              </div>
+              <pre>python launch.py</pre>
+            </div>
+            <div class="callout tip">
+              <span class="icon">🚀</span>
+              <p>The launcher opens your default browser to <code>http://127.0.0.1:7861</code> automatically. Press <kbd>Ctrl</kbd>+<kbd>C</kbd> in the terminal to stop the server.</p>
+            </div>
+            <p>Useful flags:</p>
+            <div class="code-block" data-lang="bash">
+              <div class="code-block-header">
+                <span>bash</span>
+                <button class="copy-btn" type="button">Copy</button>
+              </div>
+              <pre>python launch.py --port 9000          # custom port
+python launch.py --no-browser         # don't auto-open
+python launch.py --root .\src\ai_env  # edit a different workspace</pre>
+            </div>
+          </div>
+        </label>
+      </section>
+
+      <!-- STEP 12 -->
+      <section class="section" id="step-12">
+        <h2><span class="step-num">12</span> Prepare training data</h2>
+        <label class="step-row">
+          <input type="checkbox" data-step />
+          <div class="step-body">
+            <div class="code-block" data-lang="bash">
+              <div class="code-block-header">
+                <span>bash</span>
+                <button class="copy-btn" type="button">Copy</button>
+              </div>
+              <pre>python scripts\prepare_training_data.py --categories python devops frontend</pre>
+            </div>
+            <p>Or grab public web pages:</p>
+            <div class="code-block" data-lang="bash">
+              <div class="code-block-header">
+                <span>bash</span>
+                <button class="copy-btn" type="button">Copy</button>
+              </div>
+              <pre>python scripts\prepare_web_data.py --urls https://en.wikipedia.org/wiki/Python_(programming_language)</pre>
+            </div>
+          </div>
+        </label>
+      </section>
+
+      <!-- STEP 13 -->
+      <section class="section" id="step-13">
+        <h2><span class="step-num">13</span> Train the model</h2>
+        <label class="step-row">
+          <input type="checkbox" data-step />
+          <div class="step-body">
+            <div class="code-block" data-lang="bash">
+              <div class="code-block-header">
+                <span>bash</span>
+                <button class="copy-btn" type="button">Copy</button>
+              </div>
+              <pre>python scripts\train_model.py --model-name-or-path gpt2 --output-dir .\checkpoints</pre>
+            </div>
+            <div class="callout info">
+              <span class="icon">ℹ️</span>
+              <p>Use <code>gpt2</code> for a quick smoke test, then switch to <code>Qwen/Qwen2.5-Coder-1.5B</code> or <code>7B</code> for real fine-tuning.</p>
+            </div>
+          </div>
+        </label>
+      </section>
+
+      <!-- STEP 14 -->
+      <section class="section" id="step-14">
+        <h2><span class="step-num">14</span> Resume training</h2>
+        <p class="lede">Re-run the same command to continue from the latest checkpoint in <code>./checkpoints</code>.</p>
+        <label class="step-row">
+          <input type="checkbox" data-step />
+          <div class="step-body">
+            <div class="code-block" data-lang="bash">
+              <div class="code-block-header">
+                <span>bash</span>
+                <button class="copy-btn" type="button">Copy</button>
+              </div>
+              <pre>python scripts\train_model.py</pre>
+            </div>
+          </div>
+        </label>
+      </section>
+
+      <!-- ===== INTERACTIVE CONTROL PANEL ===== -->
+      <section class="section" id="control-panel">
+        <h2><span class="step-num">🎛</span> Interactive Control Panel</h2>
+        <p class="lede">Monitor system resources, manage the server, install the VS Code extension, and control the GitHub crawler — all from one unified dashboard.</p>
+
+        <!-- Tabs -->
+        <div class="cp-tabs" id="cp-tabs">
+          <button class="cp-tab active" data-tab="overview" id="tab-overview">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+            Overview
+          </button>
+          <button class="cp-tab" data-tab="server" id="tab-server">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+            Server
+          </button>
+          <button class="cp-tab" data-tab="crawler" id="tab-crawler">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            Crawler
+          </button>
+          <button class="cp-tab" data-tab="neural" id="tab-neural">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="19" r="2"/><line x1="12" y1="7" x2="5" y2="17"/><line x1="12" y1="7" x2="19" y2="17"/><line x1="5" y1="19" x2="19" y2="19"/></svg>
+            Neural Nets
+          </button>
+        </div>
+
+        <!-- ===== OVERVIEW PANEL ===== -->
+        <div class="cp-panel active" id="panel-overview">
+          <!-- Live metrics -->
+          <div class="metric-grid" id="metric-grid">
+            <div class="metric-card">
+              <span class="metric-val" id="m-status">—</span>
+              <div class="metric-label">Server</div>
+            </div>
+            <div class="metric-card">
+              <span class="metric-val" id="m-model">—</span>
+              <div class="metric-label">Model</div>
+            </div>
+            <div class="metric-card">
+              <span class="metric-val" id="m-cpu">—</span>
+              <div class="metric-label">CPU %</div>
+            </div>
+            <div class="metric-card">
+              <span class="metric-val" id="m-ram">—</span>
+              <div class="metric-label">RAM GB</div>
+            </div>
+            <div class="metric-card">
+              <span class="metric-val" id="m-disk">—</span>
+              <div class="metric-label">Disk Used</div>
+            </div>
+            <div class="metric-card">
+              <span class="metric-val" id="m-crawler">—</span>
+              <div class="metric-label">Crawler</div>
+            </div>
+          </div>
+
+          <!-- Status row -->
+          <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:16px;">
+            <span id="pill-server" class="status-pill pill-danger">OFFLINE</span>
+            <span id="pill-crawler" class="status-pill pill-danger">CRAWLER: IDLE</span>
+            <span style="flex:1"></span>
+            <span style="font-size:0.8rem; color:var(--text-faint);">Auto-refresh every 2.5s</span>
+          </div>
+
+          <!-- Quick action row -->
+          <div class="action-row">
+            <button class="action-btn btn-start" id="ov-server-btn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              Start Server
+            </button>
+            <button class="action-btn btn-vscode" id="ov-vscode-btn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+              Add to VS Code
+            </button>
+            <button class="action-btn btn-crawl" id="ov-crawler-btn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+              Release Crawler
+            </button>
+          </div>
+
+          <!-- Live Log -->
+          <div style="font-size:0.82rem; color:var(--text-faint); margin-bottom:6px; font-weight:600; text-transform:uppercase; letter-spacing:0.06em;">Activity Log</div>
+          <div class="live-log" id="activity-log">
+            <p class="log-entry log-dim">Waiting for server...</p>
+          </div>
+        </div>
+
+        <!-- ===== SERVER PANEL ===== -->
+        <div class="cp-panel" id="panel-server">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
+            <div>
+              <strong style="font-size:1.1rem;">Backend Server</strong>
+              <div style="font-size:0.85rem; color:var(--text-dim); margin-top:2px;">http://127.0.0.1:7861</div>
+            </div>
+            <span id="server-status-badge" class="status-pill pill-danger">OFFLINE</span>
+          </div>
+
+          <!-- Manager canvas -->
+          <canvas id="manager-brain-canvas" style="display:block; width:100%; height:110px; background:rgba(0,0,0,0.2); border-radius:var(--radius-sm); border:1px solid var(--border); margin-bottom:16px;"></canvas>
+
+          <div class="action-row">
+            <button class="action-btn btn-start" id="server-toggle-btn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              Start Server
+            </button>
+            <button class="action-btn btn-vscode" id="install-extension-btn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+              Add to VS Code
+            </button>
+            <button class="action-btn btn-neutral" id="copy-cmd-btn-2">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              Copy Start Cmd
+            </button>
+          </div>
+
+          <div id="start-instructions" style="display:none; padding:14px; border-radius:var(--radius-sm); background:var(--code-bg); border:1px solid var(--border); margin-bottom:12px;">
+            <p style="margin:0 0 8px; font-weight:bold; color:var(--accent-2); font-size:0.9rem;">Run this in your terminal to start the server:</p>
+            <code style="display:block; padding:8px; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:6px; font-family:monospace; font-size:0.85rem; color:var(--code-text);" id="cmd-to-run">python launch.py</code>
+          </div>
+
+          <!-- Resource details -->
+          <div class="col-2" id="server-resources" style="margin-top:12px;">
+            <div class="quick-card">
+              <h4 style="margin:0 0 8px; color:var(--text-dim); font-size:0.82rem; text-transform:uppercase; letter-spacing:0.06em;">CPU</h4>
+              <div class="mini-progress"><div class="mini-progress-fill" id="cpu-bar" style="background:linear-gradient(90deg, var(--accent-2), #06b6d4); width:0%"></div></div>
+              <span style="font-size:0.88rem; color:var(--text-dim);" id="cpu-text">—</span>
+            </div>
+            <div class="quick-card">
+              <h4 style="margin:0 0 8px; color:var(--text-dim); font-size:0.82rem; text-transform:uppercase; letter-spacing:0.06em;">RAM</h4>
+              <div class="mini-progress"><div class="mini-progress-fill" id="ram-bar" style="background:linear-gradient(90deg, var(--ok), #10b981); width:0%"></div></div>
+              <span style="font-size:0.88rem; color:var(--text-dim);" id="ram-text">—</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== CRAWLER PANEL ===== -->
+        <div class="cp-panel" id="panel-crawler">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
+            <div>
+              <strong style="font-size:1.1rem;">GitHub Crawler &amp; Trainer</strong>
+              <div style="font-size:0.85rem; color:var(--text-dim); margin-top:2px;">Crawls public repos, trains model, resumes from last position</div>
+            </div>
+            <span id="crawler-status-badge" class="status-pill pill-danger" style="background:rgba(148,163,184,0.1); color:var(--text-faint);">IDLE</span>
+          </div>
+
+          <div class="action-row">
+            <button class="action-btn btn-crawl" id="crawler-toggle-btn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+              Release Crawler
+            </button>
+          </div>
+
+          <!-- Crawler progress -->
+          <div class="quick-card" style="margin-bottom:12px;">
+            <div style="display:flex; justify-content:space-between; font-size:0.85rem; color:var(--text-dim); margin-bottom:6px;">
+              <span>Repository Progress</span>
+              <span><span id="crawler-current-index">0</span> / <span id="crawler-total-repos">0</span></span>
+            </div>
+            <div class="mini-progress">
+              <div class="mini-progress-fill" id="crawler-progress-fill" style="width:0%"></div>
+            </div>
+            <div style="font-size:0.82rem; color:var(--text-faint); margin-top:6px;">
+              Completed: <span id="crawler-completed-repos" style="color:var(--ok); font-family:monospace;">None</span>
+            </div>
+          </div>
+
+          <!-- Crawler logs -->
+          <div style="font-size:0.82rem; color:var(--text-faint); margin-bottom:6px; font-weight:600; text-transform:uppercase; letter-spacing:0.06em;">Crawler Log</div>
+          <div class="live-log" id="crawler-logs">(No logs yet)</div>
+        </div>
+
+        <!-- ===== NEURAL NETS PANEL ===== -->
+        <div class="cp-panel" id="panel-neural">
+          <p style="color:var(--text-dim); margin:0 0 16px;">Each model's parameter count is visualized as a neural network. Nodes pulse when the server is online. The active model animates in colour.</p>
+
+          <canvas id="manager-brain-canvas-2" style="display:block; width:100%; height:100px; background:rgba(0,0,0,0.2); border-radius:var(--radius-sm); border:1px solid var(--border); margin-bottom:16px;"></canvas>
+          <div style="font-size:0.8rem; color:var(--text-faint); text-align:center; margin-bottom:20px;">Active model neural net (updates when server connects)</div>
+
+          <div class="model-row">
+            <div class="model-net-card">
+              <h5>qwen2.5-coder:7b <span class="badge" style="margin-left:4px;vertical-align:middle;">⭐ Recommended</span></h5>
+              <canvas class="model-net-canvas" data-params="7" style="display:block; width:100%; height:60px; background:rgba(0,0,0,0.15); border-radius:6px; border:1px solid var(--border);"></canvas>
+            </div>
+            <div class="model-net-card">
+              <h5>qwen3:8b</h5>
+              <canvas class="model-net-canvas" data-params="8" style="display:block; width:100%; height:60px; background:rgba(0,0,0,0.15); border-radius:6px; border:1px solid var(--border);"></canvas>
+            </div>
+            <div class="model-net-card">
+              <h5>Qwen2.5-Coder-1.5B</h5>
+              <canvas class="model-net-canvas" data-params="2" style="display:block; width:100%; height:60px; background:rgba(0,0,0,0.15); border-radius:6px; border:1px solid var(--border);"></canvas>
+            </div>
+            <div class="model-net-card">
+              <h5>gpt2</h5>
+              <canvas class="model-net-canvas" data-params="1" style="display:block; width:100%; height:60px; background:rgba(0,0,0,0.15); border-radius:6px; border:1px solid var(--border);"></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== TROUBLESHOOTING ========== -->
+      <section class="section" id="troubleshoot">
+        <h2>Troubleshooting</h2>
+        <div class="col-2">
+          <div class="quick-card">
+            <h4>Module not found</h4>
+            <p>Your venv isn't activated. Run <code>.\.venv\Scripts\Activate.ps1</code> on Windows or <code>source .venv/bin/activate</code> on Linux/macOS.</p>
+          </div>
+          <div class="quick-card">
+            <h4>Out of memory</h4>
+            <p>Use a smaller model: <code>--model-name Qwen/Qwen2.5-Coder-1.5B</code>, and lower <code>--max-length</code>.</p>
+          </div>
+          <div class="quick-card">
+            <h4>Ollama not detected</h4>
+            <p>Install from <a href="https://ollama.com/install">ollama.com/install</a> and ensure the binary is on your PATH.</p>
+          </div>
+          <div class="quick-card">
+            <h4>Port 11434 in use</h4>
+            <p>Stop the conflicting process or remap the port in <code>docker-compose.yml</code> and <code>src/ai_env/config.py</code>.</p>
+          </div>
+          <div class="quick-card">
+            <h4>VS Code extension won't load</h4>
+            <p>Inside <code>extension/</code>: <code>npm install &amp;&amp; npm run compile</code>, then press F5 to launch the dev host.</p>
+          </div>
+          <div class="quick-card">
+            <h4>Want to start over</h4>
+            <p>Run <code>python scripts\rollback.py</code> to stop services and uninstall the active model.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== MODEL REFERENCE ========== -->
+      <section class="section" id="models">
+        <h2>Model reference</h2>
+        <p class="lede">The current model is shown in the top bar of the Web UI and in the Status panel. Change it with <code>scripts\manage_models.py</code>.</p>
+        <div class="col-2">
+          <div class="quick-card">
+            <h4>qwen2.5-coder:7b <span class="badge" style="margin-left:6px">⭐ Recommended</span></h4>
+            <p>Best balance of quality and resource use for this hardware. Default in <code>src/ai_env/config.py</code>.</p>
+          </div>
+          <div class="quick-card">
+            <h4>qwen3:8b</h4>
+            <p>Higher quality, more capable. Use only when CPU/RAM allows.</p>
+          </div>
+          <div class="quick-card">
+            <h4>Qwen/Qwen2.5-Coder-1.5B</h4>
+            <p>Low-memory training &amp; inference. Great when you hit OOM errors.</p>
+          </div>
+          <div class="quick-card">
+            <h4>gpt2</h4>
+            <p>Cheap smoke test for the training pipeline (no code-specific knowledge).</p>
+          </div>
+        </div>
+      </section>
+
+      <footer>
+        <p>AI Coding Agent environment setup guide &copy; 2026. Fully offline.</p>
+      </footer>
+    </main>
+  </div>
+
+  <!-- ========== FLOATING ACTIONS ========== -->
+  <div class="floating-actions" aria-hidden="true">
+    <button id="scroll-top-btn" title="Scroll to top">&uarr;</button>
+  </div>
+
+  <script>
+    // ========== CHECKBOX & PROGRESS TRACKING ==========
+    const checkboxes = document.querySelectorAll('input[type="checkbox"][data-step]');
+    const progressFill = document.getElementById('progress-fill');
+    
+    function updateProgress() {
+      const total = checkboxes.length;
+      let checked = 0;
+      checkboxes.forEach((cb, index) => {
+        const isChecked = localStorage.getItem('step-' + index) === 'true';
+        cb.checked = isChecked;
+        if (isChecked) checked++;
+      });
+      const pct = total > 0 ? (checked / total) * 100 : 0;
+      progressFill.style.width = pct + '%';
+    }
+
+    checkboxes.forEach((cb, index) => {
+      cb.addEventListener('change', () => {
+        localStorage.setItem('step-' + index, cb.checked);
+        updateProgress();
+      });
+    });
+
+    const resetChecksBtn = document.getElementById('reset-checks');
+    if (resetChecksBtn) {
+      resetChecksBtn.addEventListener('click', () => {
+        checkboxes.forEach((cb, index) => {
+          localStorage.removeItem('step-' + index);
+          cb.checked = false;
+        });
+        updateProgress();
+      });
+    }
+
+    // ========== THEME TOGGLE ==========
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    const htmlEl = document.documentElement;
+    
+    function setTheme(theme) {
+      if (theme === 'light') {
+        htmlEl.setAttribute('data-theme', 'light');
+        localStorage.setItem('theme', 'light');
+      } else {
+        htmlEl.removeAttribute('data-theme');
+        localStorage.setItem('theme', 'dark');
+      }
+    }
+    
+    if (themeToggleBtn) {
+      themeToggleBtn.addEventListener('click', () => {
+        const current = htmlEl.getAttribute('data-theme');
+        setTheme(current === 'light' ? 'dark' : 'light');
+      });
+    }
+    
+    setTheme(localStorage.getItem('theme'));
+    updateProgress();
+
+    // ========== COPY BUTTONS ==========
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        let code = '';
+        const codeBlock = btn.closest('.code-block');
+        if (codeBlock) {
+          const pre = codeBlock.querySelector('pre');
+          code = pre ? pre.textContent : '';
+        }
+        if (!code) return;
+        navigator.clipboard.writeText(code).then(() => {
+          btn.textContent = 'Copied!';
+          btn.classList.add('copied');
+          setTimeout(() => {
+            btn.textContent = 'Copy';
+            btn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+    });
+
+    // ========== SCROLL ACTIONS & TOC HIGHLIGHT ==========
+    const scrollBtn = document.getElementById('scroll-top-btn');
+    if (scrollBtn) {
+      window.addEventListener('scroll', () => {
+        scrollBtn.style.transform = window.scrollY > 300 ? 'scale(1)' : 'scale(0)';
+      });
+      scrollBtn.style.transform = 'scale(0)';
+      scrollBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    }
+
+    const sections = document.querySelectorAll('section[id]');
+    const tocLinks = document.querySelectorAll('.toc a');
+    
+    window.addEventListener('scroll', () => {
+      let currentSectionId = '';
+      sections.forEach(sec => {
+        if (window.scrollY >= sec.offsetTop - 80) currentSectionId = sec.getAttribute('id');
+      });
+      tocLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === '#' + currentSectionId) link.classList.add('active');
+      });
+    });
+
+    // ========== TABS ==========
+    document.querySelectorAll('.cp-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.cp-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.cp-panel').forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        const panelId = 'panel-' + tab.dataset.tab;
+        const panel = document.getElementById(panelId);
+        if (panel) panel.classList.add('active');
+        // Re-init canvases when switching to neural tab
+        if (tab.dataset.tab === 'neural') {
+          setTimeout(() => { canvasStates.forEach(s => setupNetNodes(s)); }, 50);
+        }
+      });
+    });
+
+    // ========== NEURAL NET CANVAS ENGINE ==========
+    const NODE_COLOR_ACTIVE = '#a78bfa';
+    const NODE_COLOR_INACTIVE = 'rgba(148, 163, 184, 0.2)';
+    const LINE_COLOR_ACTIVE = 'rgba(124, 58, 237, 0.25)';
+    const LINE_COLOR_INACTIVE = 'rgba(148, 163, 184, 0.08)';
+    
+    const canvasStates = [];
+    let isServerOnline = false;
+
+    function initCanvasState(canvas, paramCount, isDynamic) {
+      if (!canvas) return;
+      const state = {
+        canvas, ctx: canvas.getContext('2d'),
+        paramCount, isDynamic,
+        sparks: [], nodes: [], time: 0, width: 0, height: 0,
+        dpr: window.devicePixelRatio || 1
+      };
+      setupNetNodes(state);
+      canvasStates.push(state);
+    }
+
+    function setupNetNodes(state) {
+      state.nodes = [];
+      state.sparks = [];
+      const rect = state.canvas.getBoundingClientRect();
+      state.width = rect.width || parseInt(state.canvas.style.width) || 200;
+      state.height = rect.height || parseInt(state.canvas.style.height) || 60;
+      state.canvas.width = state.width * state.dpr;
+      state.canvas.height = state.height * state.dpr;
+      state.ctx.scale(state.dpr, state.dpr);
+
+      const N = state.paramCount || 1;
+      const h = state.height / N;
+      for (let i = 0; i < N; i++) {
+        const y = (i + 0.5) * h;
+        state.nodes.push({
+          lane: i,
+          x1: state.width * 0.15,
+          x2: state.width * 0.5,
+          x3: state.width * 0.85,
+          y,
+          pulse1: Math.random() * Math.PI,
+          pulse2: Math.random() * Math.PI,
+          pulse3: Math.random() * Math.PI
+        });
+        state.sparks.push({
+          lane: i,
+          segment: Math.random() > 0.5 ? 2 : 1,
+          progress: Math.random(),
+          speed: 0.012 + Math.random() * 0.008
+        });
+      }
+    }
+
+    // Init all canvases
+    document.querySelectorAll('.model-net-canvas').forEach(canvas => {
+      const params = parseInt(canvas.getAttribute('data-params'), 10) || 1;
+      initCanvasState(canvas, params, false);
+    });
+    initCanvasState(document.getElementById('manager-brain-canvas'), 1, true);
+    initCanvasState(document.getElementById('manager-brain-canvas-2'), 1, true);
+
+    window.addEventListener('resize', () => {
+      canvasStates.forEach(s => setupNetNodes(s));
+    });
+
+    function drawState(state, isActive) {
+      const ctx = state.ctx;
+      const { width, height } = state;
+      ctx.clearRect(0, 0, width, height);
+      state.time += 1;
+
+      // Faint grid
+      ctx.strokeStyle = 'rgba(148, 163, 184, 0.02)';
+      ctx.lineWidth = 1;
+      for (let x = 0; x < width; x += 20) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke();
+      }
+      for (let y = 0; y < height; y += 20) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke();
+      }
+
+      const lineColor = isActive ? LINE_COLOR_ACTIVE : LINE_COLOR_INACTIVE;
+
+      // Connections
+      ctx.lineWidth = 1.5;
+      for (const n of state.nodes) {
+        ctx.beginPath();
+        ctx.moveTo(n.x1, n.y);
+        ctx.lineTo(n.x2, n.y);
+        ctx.lineTo(n.x3, n.y);
+        ctx.strokeStyle = lineColor;
+        ctx.stroke();
+      }
+
+      // Sparks
+      if (isActive) {
+        for (const s of state.sparks) {
+          const n = state.nodes[s.lane];
+          if (!n) continue;
+          s.progress += s.speed;
+          if (s.progress >= 1.0) {
+            s.progress = 0;
+            s.segment = s.segment === 1 ? 2 : 1;
+            s.speed = 0.012 + Math.random() * 0.008;
+          }
+          const x = s.segment === 1
+            ? n.x1 + (n.x2 - n.x1) * s.progress
+            : n.x2 + (n.x3 - n.x2) * s.progress;
+          ctx.save();
+          ctx.shadowBlur = 6; ctx.shadowColor = '#8b5cf6';
+          ctx.fillStyle = '#c084fc';
+          ctx.beginPath(); ctx.arc(x, n.y, 2.5, 0, Math.PI * 2); ctx.fill();
+          ctx.restore();
+        }
+      }
+
+      // Nodes
+      for (const n of state.nodes) {
+        const breathe = Math.sin(state.time * 0.04 + n.lane * 2) * 0.6;
+        const r = 4.0 + breathe;
+
+        // Input
+        ctx.save();
+        if (isActive) { ctx.shadowBlur = 4; ctx.shadowColor = '#3b82f6'; ctx.fillStyle = '#60a5fa'; }
+        else ctx.fillStyle = NODE_COLOR_INACTIVE;
+        ctx.beginPath(); ctx.arc(n.x1, n.y, r, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+
+        // Hidden
+        ctx.save();
+        if (isActive) { ctx.shadowBlur = 6; ctx.shadowColor = '#8b5cf6'; ctx.fillStyle = '#a78bfa'; }
+        else ctx.fillStyle = NODE_COLOR_INACTIVE;
+        ctx.beginPath(); ctx.arc(n.x2, n.y, r, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+
+        // Output
+        ctx.save();
+        if (isActive) { ctx.shadowBlur = 4; ctx.shadowColor = '#ec4899'; ctx.fillStyle = '#f472b6'; }
+        else ctx.fillStyle = NODE_COLOR_INACTIVE;
+        ctx.beginPath(); ctx.arc(n.x3, n.y, r, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      }
+
+      // Label
+      ctx.fillStyle = isActive ? 'rgba(255,255,255,0.4)' : 'rgba(148,163,184,0.25)';
+      ctx.font = '8px monospace';
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'bottom';
+      const paramLabel = state.paramCount === 8 ? '8B' : state.paramCount === 7 ? '7B' : state.paramCount === 2 ? '1.5B' : '124M';
+      const label = state.isDynamic ? `${state.paramCount} Active Neural Net(s)` : `${state.paramCount} params (${paramLabel})`;
+      ctx.fillText(label, width - 8, height - 6);
+    }
+
+    function tick() {
+      canvasStates.forEach(state => {
+        drawState(state, state.isDynamic ? isServerOnline : true);
+      });
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+
+    // ========== ACTIVITY LOG ==========
+    const activityLogEl = document.getElementById('activity-log');
+    function addLog(msg, cls = '') {
+      if (!activityLogEl) return;
+      const p = document.createElement('p');
+      p.className = 'log-entry' + (cls ? ' ' + cls : '');
+      const now = new Date();
+      const ts = now.toTimeString().substring(0, 8);
+      p.textContent = `[${ts}] ${msg}`;
+      activityLogEl.appendChild(p);
+      activityLogEl.scrollTop = activityLogEl.scrollHeight;
+      // Keep log under 100 entries
+      while (activityLogEl.children.length > 100) activityLogEl.removeChild(activityLogEl.firstChild);
+    }
+
+    // ========== SERVER CONTROL ==========
+    const serverToggleBtn = document.getElementById('server-toggle-btn');
+    const installExtBtn   = document.getElementById('install-extension-btn');
+    const startInst       = document.getElementById('start-instructions');
+    const serverStatusBadge = document.getElementById('server-status-badge');
+    const pillServer      = document.getElementById('pill-server');
+    const mStatus         = document.getElementById('m-status');
+    const mModel          = document.getElementById('m-model');
+    const mCpu            = document.getElementById('m-cpu');
+    const mRam            = document.getElementById('m-ram');
+    const mDisk           = document.getElementById('m-disk');
+    const cpuBar          = document.getElementById('cpu-bar');
+    const ramBar          = document.getElementById('ram-bar');
+    const cpuText         = document.getElementById('cpu-text');
+    const ramText         = document.getElementById('ram-text');
+
+    // Overview quick-action buttons that mirror the main ones
+    const ovServerBtn  = document.getElementById('ov-server-btn');
+    const ovVscodeBtn  = document.getElementById('ov-vscode-btn');
+    const ovCrawlerBtn = document.getElementById('ov-crawler-btn');
+
+    function setServerOnline(online, status = {}) {
+      isServerOnline = online;
+
+      if (online) {
+        serverStatusBadge.textContent = 'ONLINE';
+        serverStatusBadge.className = 'status-pill pill-ok';
+        pillServer.textContent = 'SERVER: ONLINE';
+        pillServer.className = 'status-pill pill-ok';
+        mStatus.textContent = 'ON';
+        serverToggleBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg> Stop Server';
+        serverToggleBtn.className = 'action-btn btn-stop';
+        ovServerBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg> Stop Server';
+        ovServerBtn.className = 'action-btn btn-stop';
+        if (startInst) startInst.style.display = 'none';
+
+        const modelName = (status.model_name || 'unknown');
+        mModel.textContent = modelName.length > 8 ? modelName.substring(0, 8) + '…' : modelName;
+
+        const cpu = status.resources?.cpu_percent ?? 0;
+        const ramUsed = status.resources?.ram_used_gb ?? 0;
+        const ramTotal = status.resources?.ram_total_gb ?? 0;
+        const diskUsed = status.resources?.disk_used_gb ?? '—';
+        const diskTotal = status.resources?.disk_total_gb ?? '—';
+
+        mCpu.textContent = cpu + '%';
+        mRam.textContent = ramUsed.toFixed ? ramUsed.toFixed(1) : ramUsed;
+        mDisk.textContent = diskUsed + 'G';
+        if (cpuBar) cpuBar.style.width = Math.min(cpu, 100) + '%';
+        if (ramBar && ramTotal) ramBar.style.width = Math.min((ramUsed / ramTotal) * 100, 100) + '%';
+        if (cpuText) cpuText.textContent = cpu + '% utilized';
+        if (ramText) ramText.textContent = ramUsed.toFixed ? `${ramUsed.toFixed(1)}GB / ${ramTotal.toFixed(1)}GB` : `${ramUsed}GB / ${ramTotal}GB`;
+
+        // Update dynamic neural net param count
+        let params = 1;
+        const mn = modelName.toLowerCase();
+        if (mn.includes('7b')) params = 7;
+        else if (mn.includes('8b')) params = 8;
+        else if (mn.includes('1.5b')) params = 2;
+        canvasStates.filter(s => s.isDynamic).forEach(s => {
+          if (s.paramCount !== params) { s.paramCount = params; setupNetNodes(s); }
+        });
+      } else {
+        serverStatusBadge.textContent = 'OFFLINE';
+        serverStatusBadge.className = 'status-pill pill-danger';
+        pillServer.textContent = 'SERVER: OFFLINE';
+        pillServer.className = 'status-pill pill-danger';
+        mStatus.textContent = 'OFF';
+        mModel.textContent = '—';
+        mCpu.textContent = '—';
+        mRam.textContent = '—';
+        mDisk.textContent = '—';
+        serverToggleBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg> Start Server';
+        serverToggleBtn.className = 'action-btn btn-start';
+        ovServerBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg> Start Server';
+        ovServerBtn.className = 'action-btn btn-start';
+        canvasStates.filter(s => s.isDynamic).forEach(s => {
+          if (s.paramCount !== 1) { s.paramCount = 1; setupNetNodes(s); }
+        });
+      }
+    }
+
+    async function checkServerStatus() {
+      try {
+        const res = await fetch('http://127.0.0.1:7861/api/status', { mode: 'cors' });
+        if (res.ok) {
+          const status = await res.json();
+          if (!isServerOnline) addLog('Server came online.', 'log-ok');
+          setServerOnline(true, status);
+        } else { throw new Error('non-200'); }
+      } catch {
+        if (isServerOnline) addLog('Server went offline.', 'log-err');
+        setServerOnline(false);
+      }
+    }
+
+    if (serverToggleBtn) {
+      serverToggleBtn.addEventListener('click', async () => {
+        if (isServerOnline) {
+          try {
+            addLog('Sending shutdown request…', 'log-warn');
+            await fetch('http://127.0.0.1:7861/api/shutdown', { method: 'POST', mode: 'cors' });
+            setServerOnline(false);
+            addLog('Server stopped.', 'log-err');
+          } catch {
+            setServerOnline(false);
+          }
+        } else {
+          if (startInst) startInst.style.display = startInst.style.display === 'block' ? 'none' : 'block';
+          addLog('Showing start instructions — run python launch.py in your terminal.', 'log-dim');
+        }
+      });
+    }
+
+    if (ovServerBtn) ovServerBtn.addEventListener('click', () => serverToggleBtn.click());
+
+    // Copy start cmd
+    const copyCmdBtn2 = document.getElementById('copy-cmd-btn-2');
+    if (copyCmdBtn2) {
+      copyCmdBtn2.addEventListener('click', () => {
+        navigator.clipboard.writeText('python launch.py').then(() => {
+          copyCmdBtn2.textContent = 'Copied!';
+          setTimeout(() => { copyCmdBtn2.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy Start Cmd'; }, 2000);
+        });
+      });
+    }
+
+    // ========== INSTALL EXTENSION ==========
+    async function doInstallExtension(btn) {
+      if (!isServerOnline) {
+        alert('Please start the server first to enable automatic installation.');
+        return;
+      }
+      const origHTML = btn.innerHTML;
+      btn.disabled = true;
+      btn.textContent = 'Installing…';
+      addLog('Sending install-extension request…', 'log-warn');
+      try {
+        const res = await fetch('http://127.0.0.1:7861/api/install-extension', { method: 'POST', mode: 'cors' });
+        const data = await res.json();
+        if (res.ok && data.ok) {
+          addLog('Extension installed: ' + (data.message || ''), 'log-ok');
+          alert(data.message || 'Extension installed! Please reload VS Code.');
+          btn.style.background = 'var(--ok)';
+          btn.textContent = 'Installed ✓';
+        } else {
+          addLog('Install failed: ' + (data.error || ''), 'log-err');
+          alert('Installation failed: ' + (data.error || 'Unknown error'));
+          btn.disabled = false;
+          btn.innerHTML = origHTML;
+        }
+      } catch (err) {
+        addLog('Install error: ' + err.message, 'log-err');
+        alert('Failed to connect: ' + err.message);
+        btn.disabled = false;
+        btn.innerHTML = origHTML;
+      }
+    }
+
+    [installExtBtn, ovVscodeBtn].forEach(btn => {
+      if (btn) btn.addEventListener('click', () => doInstallExtension(btn));
+    });
+
+    // ========== CRAWLER CONTROL ==========
+    const crawlerToggleBtn   = document.getElementById('crawler-toggle-btn');
+    const crawlerStatusBadge = document.getElementById('crawler-status-badge');
+    const crawlerIndexEl     = document.getElementById('crawler-current-index');
+    const crawlerTotalEl     = document.getElementById('crawler-total-repos');
+    const crawlerCompletedEl = document.getElementById('crawler-completed-repos');
+    const crawlerLogsEl      = document.getElementById('crawler-logs');
+    const crawlerProgressFill= document.getElementById('crawler-progress-fill');
+    const pillCrawler        = document.getElementById('pill-crawler');
+    const mCrawler           = document.getElementById('m-crawler');
+
+    let crawlerStatus = 'idle';
+
+    function setCrawlerState(state) {
+      crawlerStatus = state.status || 'idle';
+      const isRunning = crawlerStatus === 'running';
+
+      crawlerStatusBadge.textContent = crawlerStatus.toUpperCase();
+      crawlerStatusBadge.className = 'status-pill ' + (isRunning ? 'pill-ok' : crawlerStatus === 'error' ? 'pill-danger' : '');
+      crawlerStatusBadge.style.background = isRunning ? 'rgba(34,197,94,0.15)' : 'rgba(148,163,184,0.1)';
+      crawlerStatusBadge.style.color = isRunning ? 'var(--ok)' : 'var(--text-faint)';
+
+      if (pillCrawler) {
+        pillCrawler.textContent = 'CRAWLER: ' + crawlerStatus.toUpperCase();
+        pillCrawler.className = 'status-pill ' + (isRunning ? 'pill-ok' : '');
+        pillCrawler.style.background = isRunning ? 'rgba(34,197,94,0.15)' : 'rgba(148,163,184,0.1)';
+        pillCrawler.style.color = isRunning ? 'var(--ok)' : 'var(--text-faint)';
+      }
+
+      if (mCrawler) mCrawler.textContent = crawlerStatus;
+
+      if (crawlerToggleBtn) {
+        if (isRunning) {
+          crawlerToggleBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="4" y="4" width="16" height="16" rx="2"/></svg> Pause Crawler';
+          crawlerToggleBtn.className = 'action-btn btn-stop';
+          if (ovCrawlerBtn) { ovCrawlerBtn.innerHTML = crawlerToggleBtn.innerHTML; ovCrawlerBtn.className = 'action-btn btn-stop'; }
+        } else {
+          crawlerToggleBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg> Release Crawler';
+          crawlerToggleBtn.className = 'action-btn btn-crawl';
+          if (ovCrawlerBtn) { ovCrawlerBtn.innerHTML = crawlerToggleBtn.innerHTML; ovCrawlerBtn.className = 'action-btn btn-crawl'; }
+        }
+      }
+
+      const idx = state.current_index || 0;
+      const total = (state.repositories || []).length;
+      if (crawlerIndexEl) crawlerIndexEl.textContent = idx;
+      if (crawlerTotalEl) crawlerTotalEl.textContent = total;
+      if (crawlerProgressFill && total > 0) crawlerProgressFill.style.width = Math.min((idx / total) * 100, 100) + '%';
+      
+      const completed = state.completed || [];
+      if (crawlerCompletedEl) crawlerCompletedEl.textContent = completed.length > 0 ? completed.join(', ') : 'None';
+
+      if (crawlerLogsEl) {
+        const logs = state.logs || [];
+        if (logs.length > 0) {
+          crawlerLogsEl.innerHTML = logs.map(log => `<div>${log}</div>`).join('');
+          crawlerLogsEl.scrollTop = crawlerLogsEl.scrollHeight;
+        }
+      }
+    }
+
+    async function checkCrawlerStatus() {
+      if (!isServerOnline) return;
+      try {
+        const res = await fetch('http://127.0.0.1:7861/api/crawler/status', { mode: 'cors' });
+        if (res.ok) setCrawlerState(await res.json());
+      } catch {}
+    }
+
+    async function doCrawlerToggle() {
+      if (!isServerOnline) {
+        alert('Please start the server first to enable the crawler.');
+        return;
+      }
+      const endpoint = crawlerStatus === 'running'
+        ? 'http://127.0.0.1:7861/api/crawler/stop'
+        : 'http://127.0.0.1:7861/api/crawler/start';
+      addLog(crawlerStatus === 'running' ? 'Pausing crawler…' : 'Starting crawler…', 'log-warn');
+      try {
+        const res = await fetch(endpoint, { method: 'POST', mode: 'cors' });
+        if (res.ok) {
+          await checkCrawlerStatus();
+          addLog(crawlerStatus === 'running' ? 'Crawler started.' : 'Crawler paused.', crawlerStatus === 'running' ? 'log-ok' : 'log-warn');
+        } else {
+          const data = await res.json();
+          alert('Action failed: ' + (data.error || 'Unknown error'));
+        }
+      } catch (err) {
+        alert('Error: ' + err.message);
+      }
+    }
+
+    if (crawlerToggleBtn) crawlerToggleBtn.addEventListener('click', doCrawlerToggle);
+    if (ovCrawlerBtn)     ovCrawlerBtn.addEventListener('click', doCrawlerToggle);
+
+    // ========== POLLING ==========
+    async function updateAll() {
+      await checkServerStatus();
+      await checkCrawlerStatus();
+    }
+    updateAll();
+    setInterval(updateAll, 2500);
+  </script>
+</body>
+</html>

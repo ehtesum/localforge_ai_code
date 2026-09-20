@@ -1,0 +1,177 @@
+Project Overview
+
+This repository is a local AI development environment designed to help a developer run a coding assistant entirely (or mostly) on their own machine. It combines Python tooling, a web-based interface, model management, training-data preparation, and local service orchestration.
+
+The project is built around a few core ideas:
+- run AI models locally using Ollama,
+- configure IDE integrations through Roo Code,
+- provide a browser UI for browsing/editing files and chatting with the model,
+- prepare repository and web content for fine-tuning,
+- keep setup steps and workflows reproducible for developers.
+
+Main Goals
+
+- Start local services needed for AI workflows.
+- Pull and manage model artifacts.
+- Check that required tools and endpoints are working.
+- Browse and edit project files from a web UI.
+- Chat with a local AI coding assistant.
+- Generate training datasets from repository content or web snapshots.
+- Support fine-tuning and checkpoint-based resume workflows.
+
+Repository Structure
+
+- src/ai_env/ contains the main Python package.
+- scripts/ contains wrapper scripts for running setup actions.
+- tests/ contains automated tests.
+- training_data/ stores generated dataset outputs.
+- checkpoints/ stores model checkpoints.
+- roocode/ contains configuration for Roo Code.
+- docs/ contains documentation.
+
+Core Python Package
+
+The main package is under src/ai_env/.
+
+Key modules:
+
+- cli.py
+  - Main command-line entry point.
+  - Handles commands such as start, stop, health, check, model, train, config, and serve-web.
+  - This is the primary controller for the project.
+
+- config.py
+  - Defines constants and default settings.
+  - Includes default model names, host/port values, and relevant file paths.
+
+- utils.py
+  - Contains shared helper utilities.
+  - Includes executable lookup, subprocess execution, JSON writing helpers.
+
+- ollama.py
+  - Wraps Ollama CLI operations.
+  - Handles checking installation, starting the service, listing models, pulling models, and removing models.
+
+- roocode.py
+  - Handles Roo Code configuration generation.
+  - Creates config files so the IDE/tooling can connect to local models.
+
+- health.py
+  - Performs health checks against services such as Ollama and Roo Code.
+  - Returns structured status results.
+
+- agent.py
+  - Implements the main coding agent logic.
+  - Loads tokenizer/model, tracks conversation history, builds prompts, and generates responses.
+  - Keeps status metrics such as tokens used and request counts.
+
+- workspace.py
+  - Manages safe workspace operations.
+  - Handles path resolution, text file detection, ignore rules, file reading/writing, and git-related helpers.
+  - Prevents access outside the allowed project root.
+
+- server.py
+  - Implements the HTTP server and API endpoints.
+  - Serves the web UI and exposes endpoints for status, file browsing, file editing, chat, reset, diff preview, and uploads.
+
+- web.py
+  - Thin wrapper around the web UI functionality.
+  - Used to start the web server and prepare web-based datasets.
+
+- train.py
+  - Handles repository dataset preparation.
+  - Scans text files, chunks them, and writes JSONL datasets.
+
+- data.py
+  - Contains repository/web data transformation utilities.
+  - Used for chunking and JSONL processing.
+
+- __main__.py
+  - Allows running the package via Python module execution.
+
+Web UI
+
+The frontend is stored in src/ai_env/web_ui/.
+
+Files:
+
+- index.html
+  - Main layout for the interface.
+  - Includes explorer, editor, chat, diff preview, and landing/connector sections.
+
+- style.css
+  - Styles the application UI.
+  - Handles layout, theming, cards, panels, buttons, and responsiveness.
+
+- app.js
+  - Handles frontend behavior.
+  - Connects the browser to the backend APIs.
+  - Manages file loading, saving, chat interactions, status updates, and uploads.
+
+The web UI is intended to provide a local developer experience where the user can:
+- browse files,
+- open and edit them,
+- inspect git changes,
+- chat with the AI,
+- upload new files/assets.
+
+How the flow works
+
+1. The user runs setup commands.
+2. The CLI ensures local runtime tools are available.
+3. Ollama is started if needed.
+4. The model is pulled or selected.
+5. The user can open the web UI.
+6. The frontend requests file and status information from the backend.
+7. The backend safely reads or writes files inside the workspace.
+8. The chat endpoint sends prompts to the AI agent.
+9. The agent responds with text generated from the local model.
+10. Training scripts can extract repo/web content into datasets for fine-tuning.
+
+Model and Service Dependencies
+
+- Ollama is used as the local model runtime.
+- Roo Code is used as an environment/integration layer for the coding workflow.
+- The Python package ties these together with a CLI and web server.
+- The repo also assumes that Python, a virtual environment, and required packages are correctly installed.
+
+Dataset Preparation
+
+The project includes logic to prepare datasets for training:
+- repository content can be scanned and chunked,
+- external web content can also be processed,
+- outputs are written to JSONL files in the training_data directory.
+
+This is useful for customizing or fine-tuning the AI assistant.
+
+Testing
+
+The tests/ directory contains automated tests for the important behaviors of the project, including:
+- server endpoints,
+- file operations,
+- CLI flows,
+- workspace logic,
+- configuration handling,
+- health checks.
+
+Operational Scripts
+
+The scripts/ folder includes wrappers that make it easier to run common tasks:
+- start services,
+- manage models,
+- run health checks,
+- prepare training data,
+- train models.
+
+These scripts exist so users can follow the setup instructions without manually handling all internal Python imports.
+
+Important Notes
+
+- The project is intended for local/offline or semi-offline workflows.
+- It assumes that the user has the necessary hardware and dependencies available.
+- The default model recommendations are listed in the setup instructions.
+- The startup and training scripts rely on the main package under src/ai_env.
+
+Short AI-Readable Summary
+
+This repository is a local AI coding environment that combines Python CLI tooling, a browser-based UI, safe workspace operations, and local model integration. It lets users start external services, browse and edit files, chat with an AI assistant, and generate training datasets from repository or web content. The package is modular, with separate components for CLI orchestration, model management, workspace handling, web serving, health checks, and dataset preparation.

@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Local AI coding agent — chat, edit files, and run git operations entirely offline." />
+  <title>AI Coding Agent</title>
+
+  <!-- CodeMirror -->
+  <link rel="stylesheet" href="vendor/codemirror/codemirror.min.css" />
+  <link rel="stylesheet" href="vendor/codemirror/theme/material-darker.min.css" />
+  <link rel="stylesheet" href="vendor/codemirror/addon/hint/show-hint.min.css" />
+
+  <!-- highlight.js for code blocks in chat -->
+  <link rel="stylesheet" href="vendor/highlight.js/styles/atom-one-dark.min.css" />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- ========== TOP BAR ========== -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="brand">
+        <span class="brand-mark">*</span>
+        <span class="brand-name">AI Coding Agent</span>
+      </div>
+      <div class="workspace-pill" title="Active workspace root">
+        <span class="dot"></span>
+        <span id="root-path" class="workspace-path">Loading...</span>
+      </div>
+    </div>
+
+    <div class="topbar-right">
+      <div class="search-wrap">
+        <input id="file-search" type="search" placeholder="Search files… (Ctrl+P)" />
+      </div>
+      <button id="new-file-btn" class="icon-btn" title="New file (Ctrl+N)">＋ File</button>
+      <button id="new-folder-btn" class="icon-btn" title="New folder">＋ Folder</button>
+      <button id="refresh-files" class="icon-btn" title="Refresh files (F5)">⟳</button>
+      <button id="theme-btn" class="icon-btn" title="Toggle theme">Theme</button>
+      <button id="help-btn" class="icon-btn" title="Keyboard shortcuts (?)">?</button>
+    </div>
+  </header>
+
+  <!-- ========== LANDING / CONNECTOR ========== -->
+  <section class="landing-page">
+    <div class="landing-hero">
+      <div>
+        <span class="eyebrow">Local AI workspace</span>
+        <h1>Build, inspect, and ship from one connected flow.</h1>
+        <p class="landing-copy">Upload files, trace the model pipeline, and jump into your repo with a clean, visual workspace.</p>
+        <div class="landing-actions">
+          <button id="launch-workspace-btn" class="primary-btn">Open workspace</button>
+          <button id="scroll-to-connector-btn" class="secondary-btn">View data flow</button>
+        </div>
+      </div>
+      <div class="hero-panel">
+        <div class="hero-stat">
+          <span>Ready</span>
+          <strong id="landing-status-text">Checking services…</strong>
+        </div>
+        <div class="hero-stat small">
+          <span>Workspace</span>
+          <strong id="landing-root-text">—</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="upload-panel">
+      <div class="upload-header">
+        <div>
+          <span class="eyebrow">Upload assets</span>
+          <h2>Drop files or browse</h2>
+        </div>
+        <button id="upload-trigger-btn" class="primary-btn">Choose files</button>
+      </div>
+      <input id="upload-input" type="file" multiple hidden />
+      <div id="upload-dropzone" class="upload-dropzone">
+        <div class="upload-dropzone-icon">⬆</div>
+        <p><strong>Drag & drop</strong> files here</p>
+        <p class="upload-dropzone-hint">Supports docs, code, configs, and datasets.</p>
+      </div>
+      <div id="upload-file-list" class="upload-file-list"></div>
+    </div>
+
+    <section id="connector-section" class="connector-section">
+      <div class="connector-header">
+        <div>
+          <span class="eyebrow">Connector map</span>
+          <h2>How the project pieces flow together</h2>
+        </div>
+      </div>
+      <div class="connector-flow">
+        <div class="connector-step">
+          <span class="connector-tag">1</span>
+          <h3>Workspace</h3>
+          <p>Browse files, create folders, and edit content safely.</p>
+        </div>
+        <div class="connector-arrow">→</div>
+        <div class="connector-step">
+          <span class="connector-tag">2</span>
+          <h3>Server API</h3>
+          <p>/api/status, /api/file, /api/chat, and /api/upload route requests.</p>
+        </div>
+        <div class="connector-arrow">→</div>
+        <div class="connector-step">
+          <span class="connector-tag">3</span>
+          <h3>Agent logic</h3>
+          <p>The model, prompt pipeline, memory, and health checks run here.</p>
+        </div>
+        <div class="connector-arrow">→</div>
+        <div class="connector-step">
+          <span class="connector-tag">4</span>
+          <h3>Training data</h3>
+          <p>Prepared datasets and checkpoints power fine-tuning and reuse.</p>
+        </div>
+      </div>
+      <div class="module-grid">
+        <article class="module-card">
+          <h3>CLI</h3>
+          <p>Commands like check, config, and launch drive setup and entry points.</p>
+        </article>
+        <article class="module-card">
+          <h3>Server</h3>
+          <p>Handles HTTP responses, workspace access, diff preview, and uploads.</p>
+        </article>
+        <article class="module-card">
+          <h3>Workspace</h3>
+          <p>Safely resolves paths, scans files, and writes repository content.</p>
+        </article>
+        <article class="module-card">
+          <h3>Data</h3>
+          <p>Chunking, JSONL prep, and dataset generation keep model inputs consistent.</p>
+        </article>
+      </div>
+    </section>
+  </section>
+
+  <!-- ========== MAIN GRID ========== -->
+  <main class="main-grid" id="workspace-panel">
+    <!-- LEFT: FILE TREE -->
+    <aside class="sidebar sidebar-left">
+      <div class="sidebar-header">
+        <h2>Explorer</h2>
+        <span id="file-count" class="counter">—</span>
+      </div>
+      <div id="file-tree" class="file-tree" role="tree">
+        <div id="file-list" class="file-list">
+          <div class="empty-state">Loading workspace…</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- CENTER: TABS + EDITOR + DIFF -->
+    <section class="center">
+      <!-- Tab bar -->
+      <div id="tab-bar" class="tab-bar">
+        <div class="tab-empty">No file open. Pick a file from the Explorer or press Ctrl+N to create one.</div>
+      </div>
+
+      <!-- Overview container (Default View) -->
+      <div id="overview-container" class="overview-container">
+        <div class="overview-card">
+          <div class="overview-header">
+            <span class="eyebrow">Local AI Workspace</span>
+            <h1>Agent Overview & Architecture</h1>
+            <p>A free, offline coding environment for low-latency code completion, planning, and debugging.</p>
+          </div>
+
+          <div class="overview-grid">
+            <div class="overview-section">
+              <h3>🔌 System Flow Architecture</h3>
+              <div class="arch-diagram">
+                <div class="arch-box client">
+                  <strong>VS Code Sidebar / Web UI</strong>
+                  <span>Frontend Editor & Chat Canvas</span>
+                </div>
+                <div class="arch-arrow">⇳</div>
+                <div class="arch-box server">
+                  <strong>Python HTTP Server</strong>
+                  <span>routes request to agent, runs on :7861</span>
+                </div>
+                <div class="arch-arrow">⇳</div>
+                <div class="arch-box agent">
+                  <strong>Coding Agent (agent.py)</strong>
+                  <span>manages conversation history & prompts</span>
+                </div>
+                <div class="arch-arrow">⇳</div>
+                <div class="arch-box backend">
+                  <strong>Inference Backend</strong>
+                  <span>Hugging Face transformers / Ollama API</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="overview-section">
+              <h3>🚀 Capabilities & Feature List</h3>
+              <ul class="feature-list">
+                <li><strong>💬 Chat and Code:</strong> Interact with the local coder model to refactor, document, or analyze files in the sidebar.</li>
+                <li><strong>⚡ Inline Completions:</strong> VS Code autocomplete registers a ghost-text provider calling the server.</li>
+                <li><strong>📂 Files and Folders:</strong> Manage the workspace with direct file creation, editing, and saving.</li>
+                <li><strong>🌿 Git Integration:</strong> Live diff rendering and automatically generated commit summaries.</li>
+                <li><strong>🧠 100% Offline:</strong> Operates entirely on-device, preserving privacy with zero external telemetry.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="overview-section full-width">
+            <h3>💡 Usage Guidelines</h3>
+            <div class="use-cases">
+              <div class="use-case">
+                <strong>Explain & Refactor</strong>
+                <p>Click on files in the explorer to open them, edit them directly, or ask the agent to optimize their implementation.</p>
+              </div>
+              <div class="use-case">
+                <strong>Draft Commits</strong>
+                <p>Save code to automatically trigger a git diff, update the suggested commit message, and maintain history.</p>
+              </div>
+              <div class="use-case">
+                <strong>VS Code Support</strong>
+                <p>Open the VS Code extension folder, compile, and debug. Use settings to toggle inline completions or chat.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Editor Container (Hidden by default, shown when file tab active) -->
+      <div id="editor-container" class="editor-container" style="display: none;">
+        <!-- Editor -->
+        <div class="editor-toolbar">
+          <div id="editor-path">No file selected</div>
+          <button id="save-file-button" class="primary-btn" disabled>Save</button>
+        </div>
+        <div class="editor-wrap">
+          <textarea id="file-editor" spellcheck="false" placeholder="Open a file from the Explorer to start editing." disabled></textarea>
+          <div id="editor-empty" class="editor-empty">
+            <div class="editor-empty-icon">[Editor]</div>
+            <div class="editor-empty-title">No file selected</div>
+            <div class="editor-empty-hint">Click a file in the Explorer, or use Ctrl+N to create a new one.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Diff + commit -->
+      <details class="diff-card" id="diff-card" open>
+        <summary>
+          <span>Diff & Commit Preview</span>
+          <span id="diff-file-name" class="diff-file-name">—</span>
+          <button id="refresh-diff-button" class="icon-btn small" type="button" title="Refresh diff">⟳</button>
+        </summary>
+        <div class="diff-body">
+          <pre id="diff-output" class="diff-output">Save a file to see its git diff here.</pre>
+          <div class="commit-row">
+            <label for="commit-summary" class="label">Suggested commit message</label>
+            <textarea id="commit-summary" rows="2" readonly placeholder="No preview available."></textarea>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <!-- RIGHT: CHAT + STATUS -->
+    <aside class="sidebar sidebar-right">
+      <div class="chat-card">
+        <div class="sidebar-header">
+          <h2>Chat</h2>
+          <div class="chat-actions" style="display: flex; gap: 8px;">
+            <button id="history-button" class="link-btn" title="View chat history">History</button>
+            <button id="new-chat-button" class="link-btn" title="Start new chat">New Chat</button>
+          </div>
+        </div>
+        <!-- NEURAL NETWORK BRAIN VISUALIZER -->
+        <div class="brain-card" style="height: 180px; position: relative; border-bottom: 1px solid rgba(148, 163, 184, 0.08); background: rgba(0, 0, 0, 0.2); overflow: hidden;">
+          <canvas id="brain-canvas" style="display: block; width: 100%; height: 100%;"></canvas>
+        </div>
+        <div id="messages" class="messages">
+          <div class="empty-state small">Ask the agent anything about your code…</div>
+        </div>
+        <div class="composer">
+          <textarea id="chat-input" rows="3" placeholder="Ask the agent…  (Enter to send, Shift+Enter for newline)"></textarea>
+          <div class="composer-footer">
+            <div class="composer-controls">
+              <label class="control-pill">
+                Temp
+                <input id="temperature" type="range" min="0" max="1.5" step="0.05" value="0.7" />
+                <span id="temperature-value">0.70</span>
+              </label>
+              <label class="control-pill">
+                Max tokens
+                <input id="max-tokens" type="number" min="64" max="4096" step="64" value="512" />
+              </label>
+            </div>
+            <button id="send-button" class="primary-btn">
+              <span class="send-label">Send</span>
+              <span class="send-spinner" hidden></span>
+            </button>
+          </div>
+        </div>
+
+        <!-- HISTORY PANEL OVERLAY -->
+        <div id="chat-history-panel" class="chat-history-panel" hidden>
+          <div class="chat-history-header">
+            <h3>Previous Chats</h3>
+            <button id="close-history-button" class="icon-btn small">×</button>
+          </div>
+          <div id="chat-history-list" class="chat-history-list">
+             <div class="empty-state small">No past sessions found.</div>
+          </div>
+        </div>
+      </div>
+
+      <details class="status-card" open>
+        <summary>Status</summary>
+        <div class="status-grid">
+          <div class="status-cell"><div class="label">Model</div><div id="model-name">—</div></div>
+          <div class="status-cell"><div class="label">Device</div><div id="device-name">—</div></div>
+          <div class="status-cell"><div class="label">Loaded</div><div id="model-loaded">—</div></div>
+          <div class="status-cell"><div class="label">Tokens used</div><div id="tokens-used">0</div></div>
+          <div class="status-cell"><div class="label">Chat turns</div><div id="chat-turns">0</div></div>
+          <div class="status-cell"><div class="label">CPU cores</div><div id="cpu-count">—</div></div>
+          <div class="status-cell"><div class="label">Memory</div><div id="memory-info">—</div></div>
+          <div class="status-cell"><div class="label">Disk free</div><div id="disk-free">—</div></div>
+          <div class="status-cell wide"><div class="label">Last source</div><div id="response-source">local model</div></div>
+          <div class="status-cell wide"><div class="label">Last response</div><div id="response-snippet">No response yet.</div></div>
+        </div>
+      </details>
+    </aside>
+  </main>
+
+  <!-- ========== TOASTS ========== -->
+  <div id="toasts" class="toasts" aria-live="polite"></div>
+
+  <!-- ========== MODAL: NEW FILE/FOLDER ========== -->
+  <div id="modal" class="modal" hidden>
+    <div class="modal-card">
+      <h3 id="modal-title">New</h3>
+      <input id="modal-input" type="text" placeholder="path/to/file.py" autocomplete="off" />
+      <div class="modal-actions">
+        <button id="modal-cancel" class="link-btn">Cancel</button>
+        <button id="modal-ok" class="primary-btn">Create</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== HELP OVERLAY ========== -->
+  <div id="help-overlay" class="modal" hidden>
+    <div class="modal-card help-card">
+      <h3>Keyboard shortcuts</h3>
+      <table class="shortcuts">
+        <tr><td><kbd>Ctrl</kbd>+<kbd>P</kbd></td><td>Search files</td></tr>
+        <tr><td><kbd>Ctrl</kbd>+<kbd>N</kbd></td><td>New file</td></tr>
+        <tr><td><kbd>Ctrl</kbd>+<kbd>S</kbd></td><td>Save current file</td></tr>
+        <tr><td><kbd>Ctrl</kbd>+<kbd>W</kbd></td><td>Close current tab</td></tr>
+        <tr><td><kbd>Ctrl</kbd>+<kbd>Enter</kbd></td><td>Send chat message</td></tr>
+        <tr><td><kbd>Shift</kbd>+<kbd>Enter</kbd></td><td>Newline in chat input</td></tr>
+        <tr><td><kbd>F5</kbd></td><td>Refresh everything</td></tr>
+        <tr><td><kbd>?</kbd></td><td>This help</td></tr>
+        <tr><td><kbd>Esc</kbd></td><td>Close modal / overlay</td></tr>
+      </table>
+      <div class="modal-actions">
+        <button id="help-close" class="primary-btn">Got it</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== SCRIPTS ========== -->
+  <script src="vendor/codemirror/codemirror.min.js"></script>
+  <script src="vendor/codemirror/mode/python/python.min.js"></script>
+  <script src="vendor/codemirror/mode/javascript/javascript.min.js"></script>
+  <script src="vendor/codemirror/mode/xml/xml.min.js"></script>
+  <script src="vendor/codemirror/mode/css/css.min.js"></script>
+  <script src="vendor/codemirror/mode/markdown/markdown.min.js"></script>
+  <script src="vendor/codemirror/mode/shell/shell.min.js"></script>
+  <script src="vendor/codemirror/mode/yaml/yaml.min.js"></script>
+  <script src="vendor/codemirror/mode/htmlmixed/htmlmixed.min.js"></script>
+  <script src="vendor/codemirror/mode/dockerfile/dockerfile.min.js"></script>
+  <script src="vendor/codemirror/mode/rst/rst.min.js"></script>
+  <script src="vendor/codemirror/mode/htmlembedded/htmlembedded.min.js"></script>
+  <script src="vendor/codemirror/mode/stex/stex.min.js"></script>
+  <script src="vendor/codemirror/addon/edit/closebrackets.min.js"></script>
+  <script src="vendor/codemirror/addon/edit/matchbrackets.min.js"></script>
+  <script src="vendor/codemirror/addon/search/search.min.js"></script>
+  <script src="vendor/codemirror/addon/search/searchcursor.min.js"></script>
+  <script src="vendor/codemirror/addon/search/jump-to-line.min.js"></script>
+  <script src="vendor/codemirror/addon/comment/comment.min.js"></script>
+  <script src="vendor/codemirror/addon/comment/continuecomment.min.js"></script>
+  <script src="vendor/codemirror/addon/hint/show-hint.min.js"></script>
+
+  <!-- marked.js for chat markdown rendering -->
+  <script src="vendor/marked/marked.min.js"></script>
+  <!-- highlight.js for code blocks -->
+  <script src="vendor/highlight.js/highlight.min.js"></script>
+
+  <script src="chat.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

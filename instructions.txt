@@ -1,0 +1,33 @@
+Local AI Environment Setup
+
+1. Open this repository in VS Code.
+2. Create and activate the virtual environment:
+   python -m venv .venv
+   .\.venv\Scripts\Activate.ps1  # Windows PowerShell
+   # or use `source .venv/bin/activate` on Linux/macOS
+3. Install required packages:
+   python -m pip install --upgrade pip
+   python -m pip install -r requirements.txt
+4. Run the environment check:
+   python -m ai_env check
+5. Generate or verify the Roo Code config:
+   python -m ai_env config
+6. Start local services:
+   python .\scripts\start_services.py
+7. Pull the preferred model:
+   python .\scripts\manage_models.py pull qwen2.5-coder:7b
+8. Run health checks:
+   python .\scripts\healthcheck.py
+9. Install recommended VS Code extensions from .vscode/extensions.json.
+10. Use Ollama through Roo Code or directly via the local endpoint.
+11. Prepare repo fine-tuning data for the topics you want:
+   python .\scripts\prepare_training_data.py --categories python devops frontend
+12. Train the model and keep checkpoints for resume:
+   python .\scripts\train_model.py --model-name-or-path gpt2 --output-dir .\checkpoints
+13. Resume training later by rerunning the same command; it will continue from the latest checkpoint.
+14. If you want to fine-tune a model locally, install the optional training packages and use the generated files under training_data/.
+
+Notes:
+- `qwen2.5-coder:7b` is the recommended working model for this hardware.
+- `qwen3:8b` is supported but should be used only when CPU resources allow.
+- The startup and training scripts use the Python package in src/ai_env for modular operation.

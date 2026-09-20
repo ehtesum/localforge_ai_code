@@ -1,0 +1,125 @@
+{
+  "name": "ai-coder-agent",
+  "displayName": "AI Coder Agent",
+  "description": "Local AI coding assistant powered by your AI Coder Agent (Ollama + Roo Code). Talks to the Python Web UI at the configured endpoint.",
+  "version": "0.1.0",
+  "engines": {
+    "vscode": "^1.70.0"
+  },
+  "categories": ["AI", "Programming Languages"],
+  "activationEvents": [
+    "onCommand:ai-coder.ask",
+    "onCommand:ai-coder.explainCode",
+    "onCommand:ai-coder.debugCode",
+    "onCommand:ai-coder.generateCode",
+    "onCommand:ai-coder.openWebUI",
+    "onView:ai-coder-chat-view"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "ai-coder-sidebar",
+          "title": "AI Coder",
+          "icon": "$(comment-discussion)"
+        }
+      ]
+    },
+    "views": {
+      "ai-coder-sidebar": [
+        {
+          "type": "webview",
+          "id": "ai-coder-chat-view",
+          "name": "AI Coder Chat"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "AI Coder Agent",
+      "type": "object",
+      "properties": {
+        "aiCoder.endpoint": {
+          "type": "string",
+          "default": "http://127.0.0.1:7861",
+          "description": "Base URL of the running AI Coder Agent Web UI (the one started by `python launch.py` or `docker compose up`)."
+        },
+        "aiCoder.enableAutocomplete": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable inline code autocomplete suggestions using local LLM."
+        },
+        "aiCoder.autocompleteModel": {
+          "type": "string",
+          "default": "qwen2.5-coder:7b",
+          "description": "Ollama model name to use for autocomplete suggestions."
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "ai-coder.ask",
+        "title": "Ask AI Coder",
+        "category": "AI Coder"
+      },
+      {
+        "command": "ai-coder.explainCode",
+        "title": "Explain Code",
+        "category": "AI Coder"
+      },
+      {
+        "command": "ai-coder.debugCode",
+        "title": "Debug Code",
+        "category": "AI Coder"
+      },
+      {
+        "command": "ai-coder.generateCode",
+        "title": "Generate Code",
+        "category": "AI Coder"
+      },
+      {
+        "command": "ai-coder.openWebUI",
+        "title": "Open Web UI in Browser",
+        "category": "AI Coder"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "ai-coder.ask",
+        "key": "ctrl+shift+a",
+        "mac": "cmd+shift+a"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "ai-coder.explainCode",
+          "group": "1_modification",
+          "when": "editorHasSelection"
+        },
+        {
+          "command": "ai-coder.debugCode",
+          "group": "1_modification",
+          "when": "editorHasSelection"
+        }
+      ],
+      "commandPalette": [
+        { "command": "ai-coder.ask" },
+        { "command": "ai-coder.explainCode" },
+        { "command": "ai-coder.debugCode" },
+        { "command": "ai-coder.generateCode" },
+        { "command": "ai-coder.openWebUI" }
+      ]
+    }
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.70.0",
+    "@types/node": "^18.0.0",
+    "typescript": "^4.7.0"
+  },
+  "scripts": {
+    "vscode:prepublish": "tsc -p ./",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  }
+}

@@ -1,0 +1,14 @@
+# Minimal requirements for the local AI environment manager.
+# The current ai_env package is implemented using Python standard library only.
+
+# Optional packages for repository fine-tuning support.
+transformers>=4.40.0
+datasets>=2.14.0
+accelerate>=0.23.0
+torch>=2.0.0
+tqdm>=4.65.0
+
+sentencepiece
+# Add additional packages here only if required by custom extensions.
+# Optional tokenizer backend for transformers slow-to-fast tokenizer conversion.
+tiktoken

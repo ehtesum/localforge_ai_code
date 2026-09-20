@@ -1,0 +1,120 @@
+version: '3.9'
+
+# =============================================================================
+#  Local AI Coding Agent — Docker Compose
+#  Three services:
+#    - ollama    : the LLM runtime (port 11434)
+#    - roocode   : the editor-side AI runtime (port 9999)
+#    - web       : the Python Web UI / agent (port 7861, build from ./Dockerfile)
+# =============================================================================
+
+services:
+  # ---------------------------------------------------------------------------
+  # 1) Ollama — local LLM runtime
+  # ---------------------------------------------------------------------------
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama_local
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ./ollama_data:/root/.ollama
+    environment:
+      OLLAMA_ALLOW_INSECURE_API: "true"
+      OLLAMA_KEEP_ALIVE: "24h"
+    command: ["ollama", "serve", "--host", "0.0.0.0", "--port", "11434"]
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:11434/v1/models"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    networks:
+      - ai_net
+
+  # ---------------------------------------------------------------------------
+  # 2) Roo Code — editor-side AI runtime
+  # ---------------------------------------------------------------------------
+  roocode:
+    image: roocode/roocode:latest
+    container_name: roocode_local
+    restart: unless-stopped
+    ports:
+      - "9999:9999"
+    volumes:
+      - ./roocode_config:/app/config:rw
+    environment:
+      ROO_BACKEND: "ollama"
+      ROO_OLLAMA_URL: "http://ollama:11434"
+    depends_on:
+      ollama:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:9999/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    networks:
+      - ai_net
+
+  # ---------------------------------------------------------------------------
+  # 3) ai-env Web UI — Python agent + browser-based editor/chat
+  # ---------------------------------------------------------------------------
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PYTHON_VERSION: "3.11"
+    image: ai-env-web:local
+    container_name: ai_env_web
+    restart: unless-stopped
+    ports:
+      - "7861:7861"
+    volumes:
+      # Persistent workspace — what the Web UI lets you browse & edit
+      - ./workspace:/app/workspace
+      # Fine-tuning checkpoints survive container rebuilds
+      - ./checkpoints:/app/checkpoints
+      # Training data files (JSONL)
+      - ./training_data:/app/training_data
+    environment:
+      # Where to find the Ollama service (compose service name = hostname)
+      OLLAMA_HOST: "ollama"
+      OLLAMA_PORT: "11434"
+      # Web UI binding
+      WEB_HOST: "0.0.0.0"
+      WEB_PORT: "7861"
+      # HuggingFace cache location
+      HF_HOME: "/app/checkpoints/hf_cache"
+      TRANSFORMERS_CACHE: "/app/checkpoints/hf_cache"
+    depends_on:
+      ollama:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:7861/api/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - ai_net
+
+# =============================================================================
+#  Shared network so the services can talk to each other by service name
+# =============================================================================
+networks:
+  ai_net:
+    driver: bridge
+    name: ai_net
+
+# =============================================================================
+#  Named volumes for any future use
+# =============================================================================
+volumes:
+  ollama_data:
+  workspace:
+  checkpoints:
+  training_data:

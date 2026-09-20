@@ -1,0 +1,9 @@
+# Extension Build
+out/
+node_modules/
+*.vsix
+
+# IDE
+.DS_Store
+*.swp
+*.swo

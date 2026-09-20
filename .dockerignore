@@ -1,0 +1,72 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Distribution / packaging
+.Python
+.venv/
+venv/
+env/
+ENV/
+build/
+dist/
+*.egg-info/
+*.egg
+.installed.cfg
+MANIFEST
+
+# Unit test / coverage
+.pytest_cache/
+.tox/
+.coverage
+.coverage.*
+htmlcov/
+.cache
+.mypy_cache/
+.ruff_cache/
+
+# IDEs / editors
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+.gitattributes
+.github/
+
+# Docs & meta
+docs/
+*.md
+LICENSE
+TODO
+todo.txt
+instructions.txt
+instructions.html
+AI_CODER_QUICK_START.md
+
+# Heavy / stateful runtime data — these are volume-mounted, not baked in
+checkpoints/
+ollama_data/
+roocode_config/
+training_data/
+workspace/
+*.log
+*.pid
+
+# Local secrets / config
+.env
+.env.local
+.env.*.local
+
+# Docker itself
+docker-compose*.yml
+Dockerfile
+.dockerignore

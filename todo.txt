@@ -1,0 +1,56 @@
+# Codebase Update TODO
+
+## Already Completed
+- [x] Create a modular Python package for local AI environment management under src/ai_env
+- [x] Update PowerShell wrappers to call python -m ai_env
+- [x] Keep Ollama and Roo Code as the core services
+- [x] Configure VS Code workspace settings for recommended tools
+- [x] Create shared `model_loader.py` to deduplicate checkpoint loading
+- [x] Create `launch.py` at repo root for one-command launch
+- [x] Add Docker support (Dockerfile, docker-compose.yml, .dockerignore)
+- [x] Polish new web UI (index.html, app.js, style.css pending finish)
+- [x] Rewrite instructions.html with progress tracking, copy buttons, TOC
+
+## Refactor: remove emojis and AI-style comments
+- [x] launch.py
+- [x] src/ai_env/model_loader.py
+- [x] src/ai_env/agent.py
+- [x] src/ai_env/inference.py (deleted)
+- [x] src/ai_env/web.py
+- [x] src/ai_env/cli.py
+- [x] src/ai_env/train.py
+- [x] src/ai_env/fine_tune.py (deleted)
+- [x] src/ai_env/ollama.py
+- [x] src/ai_env/roocode.py
+- [x] src/ai_env/health.py
+- [x] src/ai_env/utils.py
+- [x] src/ai_env/config.py
+- [x] scripts/*.py
+- [x] src/ai_env/web_ui/index.html
+- [x] src/ai_env/web_ui/style.css
+- [x] src/ai_env/web_ui/app.js
+- [x] instructions.html
+- [x] Dockerfile
+- [x] docker-compose.yml
+
+## Refactor: make the project modular
+- [x] launch.py
+- [x] Create `src/ai_env/data.py` (shared data prep: repo + web, JSONL writing, splitting)
+- [x] Refactor `src/ai_env/train.py` to use data.py
+- [x] Refactor `src/ai_env/web.py` to use data.py + workspace.py
+- [x] Create `src/ai_env/workspace.py` (file ops, git ops, path safety)
+- [x] Create `src/ai_env/ollama_agent.py` (Ollama HTTP API agent)
+- [x] Update `serve_web_ui` to accept `agent=` parameter
+- [x] Create `src/ai_env/server.py` (HTTP request handler split out of web.py)
+
+## Refactor: remove unnecessary files
+- [x] Remove `AI_CODER_QUICK_START.md` (replaced by README.md)
+- [x] Remove `src/ai_env/inference.py` (functionality covered by agent.py + model_loader.py)
+- [x] Remove `src/ai_env/fine_tune.py` (or merge with trainer.py)
+
+## Verification
+- [x] All ai_env modules import without error
+- [x] All scripts/*.py import without error
+- [x] web.serve_web_ui signature accepts agent kwarg
+- [x] ollama_agent module is importable
+- [x] No broken imports remain
