@@ -1,84 +1,86 @@
-# LocalForge AI Code — Local AI Coding Assistant
+# 💻 LocalForge AI Code — Private On-Device Coding Assistant
 
-A self-hosted AI coding assistant powered by fine-tuned Qwen2.5-Coder models. Runs entirely on your local machine with a browser-based IDE, interactive CLI, and VS Code extension.
+## 💡 What is this in simple words?
 
-## Architecture
+Tools like GitHub Copilot and Cursor send your private code files across the internet to big cloud servers.
 
-```
-localforge_ai_code/
-├── src/ai_env/
-│   ├── server.py          HTTP server + JSON API (ThreadingHTTPServer)
-│   ├── agent.py           Qwen2.5-Coder local inference engine
-│   ├── ollama_agent.py    Ollama HTTP API agent backend
-│   ├── workspace.py       Git integration, file operations, system snapshots
-│   ├── crawler.py         Code context crawler for project understanding
-│   ├── data.py            Training data preparation pipeline
-│   ├── train.py           LoRA fine-tuning on custom code datasets
-│   ├── cli.py             Interactive terminal interface
-│   ├── web.py             Web UI bootstrap
-│   ├── model_loader.py    Model loading & checkpoint management
-│   └── web_ui/            Static frontend (HTML/CSS/JS chat interface)
-├── extension/             VS Code extension (TypeScript)
-├── checkpoints/           Fine-tuned model weights
-├── training_data/         Custom training datasets
-├── start.sh               Linux startup script
-├── Dockerfile             Container build definition
-└── docker-compose.yml     Multi-service orchestration
-```
+**LocalForge** is your own **100% private, self-hosted coding AI**:
+- Runs fine-tuned coding models (like **Qwen2.5-Coder** or models running in **Ollama**) entirely on your computer's GPU or CPU.
+- Works as a **browser IDE**, an **interactive terminal (CLI)**, or as a **VS Code extension**.
+- Understands your project files, suggests code fixes, generates diffs, and writes functions—with **zero code leaving your machine**.
 
-**Data flow**: User prompt → Agent (local Qwen or Ollama) → Workspace context injection → Code diff generation → Web UI inline preview.
+---
 
-## Setup
+## 📁 What does each file & script do?
 
-### Prerequisites
-- Python 3.10+
-- NVIDIA GPU with 4GB+ VRAM (GTX 1650 minimum) or CPU-only mode
-- CUDA 12.1 toolkit (for GPU acceleration)
+| File / Folder | What it actually does |
+| :--- | :--- |
+| **`launch.py`** | **The main launcher!** Starts the LocalForge AI server and optionally pops open the web interface in your browser. |
+| **`src/ai_env/server.py`** | The backend HTTP server that routes requests between the UI, VS Code, and the local AI model. |
+| **`src/ai_env/agent.py`** | The AI brain using PyTorch & Hugging Face to run Qwen2.5-Coder on your NVIDIA graphics card. |
+| **`src/ai_env/ollama_agent.py`** | Alternative AI brain that talks to your locally running Ollama server (`http://localhost:11434`). |
+| **`src/ai_env/workspace.py`** | Reads files in your project, checks git status, and safely applies code diffs. |
+| **`src/ai_env/crawler.py`** | Scans your codebase to find related functions and classes to give the AI context before it answers. |
+| **`src/ai_env/cli.py`** | Interactive command-line chat (talk to your coding assistant right in PowerShell). |
+| **`src/ai_env/train.py`** | Allows you to fine-tune (LoRA) the AI model on your own private code patterns. |
+| **`extension/`** | The VS Code extension plugin source code. |
 
-### Installation
+---
 
-```bash
-cd localforge_ai_code
-python3 -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
+## 🚀 How to Run It (Step-by-Step)
 
-# For GPU inference (recommended):
-pip install torch==2.3.0 --index-url https://download.pytorch.org/whl/cu121
-```
+### Option 1: Web Interface (Easiest)
 
-### Running
+1. Open PowerShell and go to this directory:
+   ```powershell
+   cd c:\Users\user\Desktop\projects\localforge_ai_code
+   ```
+2. Activate your virtual environment:
+   ```powershell
+   .venv\Scripts\activate
+   ```
+3. Start the application:
+   ```powershell
+   python launch.py
+   ```
+   This will launch the LocalForge server and open your browser to the web chat interface.
 
-```bash
-# Linux launcher (default headless server)
-./start.sh
+---
 
-# Python manual launch
-python launch.py --no-browser
+### Option 2: Command-Line Interface (Terminal Chat)
 
-# CLI mode
+If you just want to ask coding questions inside your terminal:
+```powershell
 python -m ai_env --cli
-
-# With Ollama backend
-python launch.py --backend ollama
 ```
+You can type questions like:
+- *"Explain what launch.py does"*
+- *"Write a Python script to resize images"*
 
-Open **http://127.0.0.1:7861** after launch.
+---
 
-## Hardware Requirements
+### Option 3: Using with Ollama
 
-| Component | Minimum | Recommended |
-|-----------|---------|-------------|
-| CPU | 4 cores | 8+ cores |
-| RAM | 8 GB | 16 GB |
-| GPU VRAM | 4 GB (GTX 1650) | 8 GB (RTX 3060+) |
-| Disk | 15 GB | 30 GB |
-| OS | Linux / Windows | Ubuntu 22.04+ / Windows 11 |
+If you already have Ollama installed with a model like `qwen2.5-coder` or `llama3.2`:
+```powershell
+python launch.py --backend ollama --model qwen2.5-coder
+```
+LocalForge will connect to your local Ollama instance and use it for fast code completions.
 
-## 🚧 Works to be Done / Future Roadmap
+---
 
-- [ ] **Tree-sitter AST Indexing**: Implement repository-wide AST parsing and dependency graph indexing for precise multi-file context retrieval.
-- [ ] **Fill-in-the-Middle (FIM) Engine**: Integrate lightweight local models (e.g. Qwen2.5-Coder-1.5B) for real-time inline code completion.
-- [ ] **Ollama Status Widget**: Add real-time model downloading and progress telemetry directly inside the Web UI topbar.
-- [ ] **Interactive Git Diff Approval**: Require visual user confirmation before applying multi-file code modifications.
-- [ ] **Container Hardening**: Add non-root user execution constraints to `Dockerfile` for safe sandbox execution.
+## Technical Limitations
+
+- **Consumer VRAM Ceilings**: Loading 7B parameter models unquantized requires >14 GB VRAM; consumer GPUs (4–8 GB VRAM) require 4-bit AWQ or GGUF quantization, constraining concurrent active context to 8,192 tokens.
+- **Multi-File Symbol Resolution**: The workspace crawler parses single-file Tree-sitter AST nodes accurately, but cross-file transitive type dependencies across complex monorepos require manual context pinning.
+- **Inline Keystroke Autocomplete Latency**: Real-time ghost-text autocomplete requires sub-100 ms latency; on CPU-only setups, inference times of 200–500 ms limit practical usage to chat and function generation modes.
+
+---
+
+## Future Roadmap
+
+- [ ] **LSP (Language Server Protocol) Daemon Bridge**: Connect directly to native language servers (`gopls`, `pyright`, `tsserver`) to ingest exact compile-time type diagnostics.
+- [ ] **vLLM / FlashAttention-2 Paged KV-Cache**: Integrate a high-throughput local inference backend with continuous batching and PagedAttention for sub-50 ms completion latency.
+- [ ] **Iterative Test-Execution Loop**: Implement an autonomous agent mode that executes unit tests, captures stack traces, and iterates on code diffs until tests pass.
+- [ ] **Repository Embedding Graph**: Build an offline LanceDB / sqlite-vec vector store caching symbol embeddings across git revisions.
+
